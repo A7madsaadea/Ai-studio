@@ -24,3 +24,25 @@ events/
 graphify-out/
 test_out.mp4
 test_raw.mp4
+
+# Local media and test outputs
+/assets/
+/test_out/
+/test_out2/
+/test_out3/
+/ref.mp4
+/final_video.mp4
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Model weights and local secrets
+*.pt
+*.pth
+*.onnx
+.env
+.env.*
+!.env.example
