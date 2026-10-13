@@ -5,3 +5,22 @@ __pycache__/
 *.pyo
 .DS_Store
 credentials.json
+
+# Local secrets and environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local user data and generated output
+uploads/
+sessions/
+events/
+graphify-out/
+test_out.mp4
+test_raw.mp4

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تك عربي | محلل الأسلوب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange:#FF6B00; --orange-glow:rgba(255,107,0,0.15);
+  --black:#0A0A0A; --card:#181818; --card2:#111;
+  --border:#2a2a2a; --text:#F0F0F0; --muted:#777;
+  --green:#22c55e; --red:#ef4444; --purple:#a855f7; --blue:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,107,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,0,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* ── HEADER ── */
+header{position:relative;z-index:10;border-bottom:1px solid var(--border);background:rgba(10,10,10,0.9);backdrop-filter:blur(12px)}
+.header-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-bottom:1px solid var(--border)}
+.header-social{display:flex;align-items:center;gap:16px}
+.header-social a{color:#aaa;text-decoration:none;transition:color .2s;display:flex;align-items:center}
+.header-social a:hover{color:#fff}
+.header-social svg{width:17px;height:17px;fill:currentColor}
+.header-links{display:flex;align-items:center;gap:24px}
+.header-links a{color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:color .2s}
+.header-links a:hover{color:var(--orange)}
+.header-mainrow{display:flex;align-items:center;justify-content:space-between;padding:14px 40px}
+.logo-area{display:flex;align-items:center;gap:14px}
+.logo-area img{height:38px}
+.logo-area span{font-size:13px;color:var(--muted);border-right:2px solid var(--orange);padding-right:14px;font-weight:600}
+.nav-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.nav-tab{padding:8px 16px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;text-decoration:none}
+.nav-tab:hover{border-color:var(--orange);color:var(--orange)}
+.nav-tab.active{background:var(--orange);border-color:var(--orange);color:white}
+
+/* ── MAIN ── */
+main{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:44px 24px 80px}
+
+/* HERO */
+.hero{margin-bottom:36px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,0.1);border:1px solid var(--blue);color:var(--blue);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px}
+.hero h1{font-size:clamp(24px,3.5vw,36px);font-weight:900;margin-bottom:6px}
+.hero h1 span{color:var(--blue)}
+.hero p{color:var(--muted);font-size:14px}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:2px dashed var(--border);border-radius:20px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--card);margin-bottom:16px;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:rgba(59,130,246,0.04)}
+.upload-zone input{display:none}
+.upload-icon{font-size:40px;margin-bottom:12px}
+.upload-title{font-size:17px;font-weight:900;margin-bottom:6px}
+.upload-sub{color:var(--muted);font-size:13px}
+.upload-limit{margin-top:10px;font-size:11px;color:#555;background:#111;border-radius:8px;padding:4px 12px;display:inline-block}
+
+/* ── FILE LIST ── */
+.file-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.file-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;animation:fadeUp .2s ease}
+.file-row.done{border-color:rgba(34,197,94,.35)}
+.file-row.error{border-color:rgba(239,68,68,.35)}
+.file-row.analyzing{border-color:rgba(255,107,0,.35)}
+.file-thumb{font-size:26px;flex-shrink:0}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:11px;color:var(--muted);margin-top:2px}
+.file-status{font-size:11px;font-weight:700;margin-top:3px}
+.status-waiting{color:var(--muted)}
+.status-analyzing{color:var(--orange)}
+.status-done{color:var(--green)}
+.status-error{color:var(--red)}
+.file-progress{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.file-progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .4s}
+.btn-rm{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.btn-rm:hover{border-color:var(--red);color:var(--red)}
+
+/* ADD MORE */
+.btn-add-more{width:100%;background:transparent;border:1.5px dashed var(--border);color:var(--muted);padding:12px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:20px;display:none}
+.btn-add-more:hover{border-color:var(--blue);color:var(--blue)}
+.btn-add-more.visible{display:block}
+
+/* ANALYZE BTN */
+.btn-analyze{width:100%;padding:17px;border-radius:14px;background:linear-gradient(135deg,var(--blue),#2563eb);border:none;color:white;font-family:'Cairo',sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all .25s;margin-bottom:32px;box-shadow:0 4px 24px rgba(59,130,246,.3);display:none}
+.btn-analyze.visible{display:block}
+.btn-analyze:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.45)}
+.btn-analyze:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ── GLOBAL PROGRESS ── */
+.global-progress{display:none;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;text-align:center}
+.global-progress.visible{display:block;animation:fadeUp .3s ease}
+.gp-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+.gp-title{font-size:15px;font-weight:900;margin-bottom:6px}
+.gp-sub{color:var(--muted);font-size:13px}
+.gp-sub span{color:var(--blue);font-weight:700}
+.gp-bar{height:5px;background:var(--border);border-radius:3px;margin-top:16px;overflow:hidden}
+.gp-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));border-radius:3px;transition:width .5s}
+
+/* ── RESULTS ── */
+.results{display:none}
+.results.visible{display:block;animation:fadeUp .4s ease}
+
+/* SUMMARY BANNER */
+.summary-banner{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.summary-stat{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px}
+.summary-num{font-size:26px;font-weight:900;color:var(--blue)}
+.summary-lbl{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+.summary-divider{width:1px;height:44px;background:var(--border)}
+.summary-actions{margin-right:auto;display:flex;gap:8px}
+.btn-save-all{background:var(--green);border:none;color:white;padding:10px 22px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn-save-all:hover{opacity:.85}
+.btn-new{background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:10px 18px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-new:hover{border-color:var(--orange);color:var(--orange)}
+
+/* VIDEO RESULT CARD */
+.video-result{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:16px}
+.vr-header{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s;border-bottom:1px solid var(--border)}
+.vr-header:hover{background:#1c1c1c}
+.vr-num{width:32px;height:32px;border-radius:10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue);flex-shrink:0}
+.vr-title{flex:1;font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vr-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;flex-shrink:0}
+.vr-badge.done{background:rgba(34,197,94,.12);color:var(--green)}
+.vr-chevron{color:var(--muted);font-size:16px;transition:transform .25s;flex-shrink:0}
+.vr-chevron.open{transform:rotate(180deg)}
+
+.vr-body{display:none;padding:20px}
+.vr-body.open{display:block}
+
+/* TRANSCRIPT */
+.section-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:16px}
+.section-label:first-child{margin-top:0}
+.transcript-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:2;color:#bbb;max-height:160px;overflow-y:auto;white-space:pre-wrap}
+
+/* ANALYSIS GRID */
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.analysis-item{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.ai-title{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.ai-body{font-size:13px;color:#ccc;line-height:1.7}
+
+/* RULES */
+.rules-grid{display:flex;flex-direction:column;gap:8px}
+.rule-row{display:flex;align-items:flex-start;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.rule-chk{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;margin-top:1px}
+.rule-chk.on{background:var(--green);border-color:var(--green);color:white}
+.rule-txt{font-size:13px;color:#ccc;line-height:1.6;flex:1}
+.rule-cat{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* SAVE PER VIDEO */
+.vr-save-btn{margin-top:14px;background:rgba(34,197,94,.1);border:1.5px solid var(--green);color:var(--green);padding:9px 20px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
+.vr-save-btn:hover{background:rgba(34,197,94,.2)}
+.vr-save-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* COMPARISON CARD */
+.comparison-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:20px}
+.comparison-title{font-size:15px;font-weight:900;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.pattern-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #1f1f1f}
+.pattern-item:last-child{border-bottom:none}
+.pattern-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+.pattern-text{font-size:13px;color:#ccc;line-height:1.6}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--black)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+@media(max-width:640px){
+  .header-topbar,.header-mainrow{padding:10px 16px}
+  main{padding:28px 16px 60px}
+  .analysis-grid{grid-template-columns:1fr}
+  .summary-banner{gap:12px}
+}
+
+  /* ── SHARED HEADER ── */
+  header { position:relative; z-index:10; background:rgba(10,10,10,0.92); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .hdr-top { display:flex; align-items:center; justify-content:space-between; padding:9px 36px; border-bottom:1px solid var(--border); }
+  .hdr-social { display:flex; align-items:center; gap:14px; }
+  .hdr-social a { color:#666; text-decoration:none; transition:color .2s; display:flex; align-items:center; }
+  .hdr-social a:hover { color:#fff; }
+  .hdr-social svg { width:16px; height:16px; fill:currentColor; }
+  .hdr-links { display:flex; align-items:center; gap:20px; }
+  .hdr-links a { color:#666; font-size:12px; font-weight:600; text-decoration:none; transition:color .2s; }
+  .hdr-links a:hover { color:var(--orange); }
+  .hdr-main { display:flex; align-items:center; justify-content:space-between; padding:12px 36px; }
+  .hdr-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+  .hdr-logo img { height:36px; }
+  .hdr-logo-text { display:flex; flex-direction:column; }
+  .hdr-logo-name { font-size:15px; font-weight:900; color:var(--text); line-height:1; }
+  .hdr-logo-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+  .hdr-nav { display:flex; align-items:center; gap:4px; }
+  .hdr-nav a { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; text-decoration:none; color:var(--muted); border:1.5px solid transparent; transition:all .2s; white-space:nowrap; }
+  .hdr-nav a:hover { color:var(--text); background:#1e1e1e; border-color:var(--border); }
+  .hdr-nav a.active { color:white; background:var(--orange); border-color:var(--orange); }
+  .hdr-nav a .nav-icon { font-size:15px; line-height:1; }
+  .hdr-divider { width:1px; height:20px; background:var(--border); margin:0 4px; }
+  @media(max-width:768px) {
+    .hdr-top { padding:8px 16px; }
+    .hdr-links { display:none; }
+    .hdr-main { padding:10px 16px; }
+    .hdr-nav a span.nav-label { display:none; }
+    .hdr-nav a { padding:8px 10px; }
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <div class="hdr-social">
+      <a href="https://www.linkedin.com/company/tech3arabi" target="_blank" title="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.35-1.85 3.58 0 4.24 2.36 4.24 5.43v6.31zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+      <a href="https://x.com/tech3arabi" target="_blank" title="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a href="https://www.instagram.com/tech3arabi/" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+      <a href="https://www.youtube.com/channel/UCE8CiAZGzMrTHnBEZaAqFWg" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+      <a href="https://www.facebook.com/3rabi.me/" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+      <a href="https://www.threads.com/@tech3arabi" target="_blank" title="Threads"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.536 11.107c-.394-.181-.81-.34-1.24-.474-.186-2.37-1.42-3.73-3.588-3.744h-.044c-1.31 0-2.4.558-3.073 1.573l1.44.988c.5-.758 1.286-.92 1.633-.92h.03c.63.004 1.107.187 1.416.543.224.258.373.618.446 1.072a11.7 11.7 0 0 0-1.806.32c-1.794.48-2.948 1.537-2.948 3.103 0 .022 0 .044.002.066.072 1.647 1.39 2.737 3.19 2.737 1.17 0 2.198-.41 2.906-1.152.54-.573.882-1.31 1.03-2.226.233.14.44.296.617.465.554.531.85 1.21.85 1.972 0 1.818-2.14 3.746-5.39 3.746-2.852 0-5.126-1.02-6.564-2.95C1.47 14.65.999 13.162.999 12c0-1.162.47-2.65 1.465-4.023C3.9 6.047 6.175 5.027 9.027 5.027c2.874 0 5.018.99 6.377 2.942.564.805.965 1.726 1.194 2.735l1.688-.4c-.27-1.24-.763-2.37-1.462-3.367C15.116 4.802 12.47 3.527 9.027 3.527c-3.425 0-6.23 1.262-8.12 3.653C-.437 8.956-1 10.846-1 12c0 1.154.437 3.044 1.907 4.82C2.797 19.21 5.602 20.473 9.027 20.473c4.226 0 6.89-2.524 6.89-5.246 0-1.285-.49-2.402-1.38-3.12zm-5.09 3.688c-.857 0-1.487-.427-1.513-1.04-.018-.428.197-.752.624-.966.41-.208.972-.314 1.67-.314.293 0 .577.02.851.059-.204 1.348-1.025 2.26-1.633 2.26z"/></svg></a>
+    </div>
+    <div class="hdr-links">
+      <a href="https://network.tech3arabi.com/" target="_blank">شبكة تك عربي ↗</a>
+      <a href="https://tech3arabi.com/" target="_blank">الموقع الرسمي ↗</a>
+    </div>
+  </div>
+  <div class="hdr-main">
+    <a class="hdr-logo" href="/">
+      <img src="/static/logo.png" alt="تك عربي" onerror="this.style.display='none'">
+      <div class="hdr-logo-text">
+        <span class="hdr-logo-name">تك عربي</span>
+        <span class="hdr-logo-sub">أدوات التيم</span>
+      </div>
+    </a>
+    <nav class="hdr-nav">
+      <a href="/ideas" class="nav-tab"><span class="nav-icon">💡</span><span class="nav-label">الأفكار</span></a>
+      <a href="/script" class="nav-tab"><span class="nav-icon">🎬</span><span class="nav-label">السكريبت</span></a>
+      <a href="/brain" class="nav-tab"><span class="nav-icon">🧠</span><span class="nav-label">Style Brain</span></a>
+      <a href="/" class="nav-tab"><span class="nav-icon">📸</span><span class="nav-label">معالج الصور</span></a>
+      <a href="/analyze" class="nav-tab active"><span class="nav-icon">🔬</span><span class="nav-label">محلل الأسلوب</span></a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-badge">🔬 Style Analyzer</div>
+    <h1>محلل <span>أسلوب تك عربي</span></h1>
+    <p>ارفع حتى 5 فيديوهات — نحولهم نص، نحللهم، ونحفظ القواعد لـ Style Brain تلقائياً</p>
+  </div>
+
+  <!-- UPLOAD ZONE -->
+  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept="video/*" multiple>
+    <div class="upload-icon">🎬</div>
+    <div class="upload-title">ارفع الفيديوهات هون</div>
+    <div class="upload-sub">اسحب وأفلت أو اضغط للاختيار</div>
+    <div class="upload-limit">MP4 · MOV · AVI · WebM &nbsp;·&nbsp; حتى 5 فيديوهات &nbsp;·&nbsp; 500MB لكل فيديو</div>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list" id="fileList"></div>
+
+  <!-- ADD MORE -->
+  <button class="btn-add-more" id="btnAddMore" onclick="document.getElementById('fileInput').click()">
+    + أضف فيديو آخر (حتى 5)
+  </button>
+
+  <!-- ANALYZE -->
+  <button class="btn-analyze" id="analyzeBtn" onclick="startAnalysis()">
+    🔬 حلل الفيديوهات
+  </button>
+
+  <!-- GLOBAL PROGRESS -->
+  <div class="global-progress" id="globalProgress">
+    <div class="gp-spinner"></div>
+    <div class="gp-title" id="gpTitle">جاري التحليل...</div>
+    <div class="gp-sub" id="gpSub">الفيديو <span id="gpCurrent">1</span> من <span id="gpTotal">1</span></div>
+    <div class="gp-bar"><div class="gp-bar-fill" id="gpFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="resultsSection">
+
+    <!-- SUMMARY -->
+    <div class="summary-banner" id="summaryBanner"></div>
+
+    <!-- COMPARISON (يظهر لو أكثر من فيديو) -->
+    <div class="comparison-card" id="comparisonCard" style="display:none">
+      <div class="comparison-title">🔁 الأنماط المشتركة بين كل الفيديوهات</div>
+      <div id="comparisonBody"></div>
+    </div>
+
+    <!-- VIDEO RESULTS -->
+    <div id="videoResults"></div>
+
+  </div>
+</main>
+
+<script>
+const DEEPSEEK_KEY = 'sk-685e199ee923499a900f0bd9c2fa8741';
+const MAX_FILES = 5;
+
+let files = [];       // { file, name, size, status, transcript, analysis }
+let analyzing = false;
+
+// ══════════════════════════════════════
+//  UPLOAD
+// ══════════════════════════════════════
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag');
+  addFiles([...e.dataTransfer.files]);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  addFiles([...e.target.files]);
+  e.target.value = '';
+});
+
+function addFiles(incoming) {
+  const allowed = ['video/mp4','video/quicktime','video/x-msvideo','video/webm','video/x-matroska','video/avi','video/mov'];
+  for (const f of incoming) {
+    if (files.length >= MAX_FILES) { showToast('⚠️', `الحد الأقصى ${MAX_FILES} فيديوهات`); break; }
+    if (!f.type.startsWith('video/') && !allowed.includes(f.type)) continue;
+    if (files.find(x => x.name === f.name)) continue; // no duplicates
+    files.push({ file: f, name: f.name, size: f.size, status: 'waiting', transcript: '', analysis: null, rules: [] });
+  }
+  renderFileList();
+  updateUI();
+}
+
+function removeFile(i) {
+  files.splice(i, 1);
+  renderFileList();
+  updateUI();
+}
+
+function renderFileList() {
+  const el = document.getElementById('fileList');
+  el.innerHTML = files.map((f, i) => `
+    <div class="file-row ${f.status}" id="frow-${i}">
+      <div class="file-thumb">🎬</div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-size">${(f.size/1024/1024).toFixed(1)} MB</div>
+        <div class="file-status status-${f.status}" id="fstatus-${i}">${statusLabel(f.status)}</div>
+        <div class="file-progress"><div class="file-progress-fill" id="fprog-${i}" style="width:${f.status==='done'?100:0}%"></div></div>
+      </div>
+      ${!analyzing ? `<button class="btn-rm" onclick="removeFile(${i})">✕</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function statusLabel(s) {
+  return { waiting:'⏳ في الانتظار', analyzing:'🔄 جاري التحليل...', done:'✅ اكتمل', error:'❌ خطأ' }[s] || s;
+}
+
+function updateUI() {
+  const hasFiles = files.length > 0;
+  zone.style.display = hasFiles ? 'none' : '';
+  document.getElementById('btnAddMore').classList.toggle('visible', hasFiles && files.length < MAX_FILES && !analyzing);
+  document.getElementById('analyzeBtn').classList.toggle('visible', hasFiles && !analyzing);
+  document.getElementById('analyzeBtn').disabled = files.length === 0 || analyzing;
+}
+
+// ══════════════════════════════════════
+//  ANALYSIS FLOW
+// ══════════════════════════════════════
+async function startAnalysis() {
+  if (!files.length || analyzing) return;
+  analyzing = true;
+  updateUI();
+
+  document.getElementById('globalProgress').classList.add('visible');
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('gpTotal').textContent = files.length;
+
+  const allAnalyses = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    document.getElementById('gpCurrent').textContent = i + 1;
+    document.getElementById('gpTitle').textContent = `جاري تحليل: ${f.name}`;
+    setGlobalProgress((i / files.length) * 85);
+
+    setFileStatus(i, 'analyzing', 10);
+
+    try {
+      // STEP 1: رفع للسيرفر واستخراج النص
+      const formData = new FormData();
+      formData.append('video', f.file);
+      setFileStatus(i, 'analyzing', 30);
+
+      const res = await fetch('/analyze-video', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      files[i].transcript = data.transcript;
+      setFileStatus(i, 'analyzing', 60);
+
+      // STEP 2: تحليل بـ DeepSeek
+      const analysis = await analyzeTranscript(data.transcript, f.name);
+      files[i].analysis = analysis;
+      files[i].rules = analysis.rules || [];
+      setFileStatus(i, 'done', 100);
+      allAnalyses.push({ name: f.name, analysis });
+
+    } catch(e) {
+      files[i].status = 'error';
+      files[i].errorMsg = e.message;
+      setFileStatus(i, 'error', 0);
+    }
+  }
+
+  // STEP 3: لو أكثر من فيديو، استخرج الأنماط المشتركة
+  let patterns = null;
+  if (allAnalyses.length > 1) {
+    setGlobalProgress(90);
+    document.getElementById('gpTitle').textContent = 'جاري مقارنة الفيديوهات...';
+    patterns = await extractCommonPatterns(allAnalyses);
+  }
+
+  setGlobalProgress(100);
+  setTimeout(() => {
+    document.getElementById('globalProgress').classList.remove('visible');
+    renderResults(patterns);
+    analyzing = false;
+    updateUI();
+  }, 600);
+}
+
+async function analyzeTranscript(transcript, filename) {
+  const prompt = `أنت خبير تحليل محتوى لقناة تقنية عربية شبابية اسمها "تك عربي".
+
+حلل هاد النص المستخرج من فيديو واستخرج منه المعلومات التالية.
+
+اسم الفيديو: ${filename}
+النص:
+"""
+${transcript.slice(0, 3000)}
+"""
+
+أرجع JSON فقط بدون أي نص إضافي:
+{
+  "hook_style": "كيف بدأ الفيديو وأسلوب الهوك",
+  "language_style": "أسلوب اللغة — شامية/فصحى، قصيرة/طويلة، مباشرة/سردية",
+  "pacing": "إيقاع الكلام والتصاعد الدرامي",
+  "cta_style": "كيف طلب من المشاهد يتفاعل",
+  "structure": "بنية الفيديو العامة",
+  "recurring_phrases": ["عبارات متكررة أو أنماط"],
+  "rules": [
+    {"text": "قاعدة مستخرجة قابلة للتطبيق", "category": "هوك"},
+    {"text": "قاعدة ثانية", "category": "لغة"},
+    {"text": "قاعدة ثالثة", "category": "إيقاع"},
+    {"text": "قاعدة رابعة", "category": "بنية"},
+    {"text": "قاعدة خامسة", "category": "CTA"}
+  ]
+}`;
+
+  const res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: 'أرجع JSON فقط بدون أي نص إضافي أو backticks.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.3, max_tokens: 1200
+    })
+  });
+  const data = await res.json();
+  const raw = data.choices[0].message.content.replace(/```json|```/g,'').trim();
+  return JSON.parse(raw);
+}
+
+async function extractCommonPatterns(analyses) {
+  const summary = analyses.map((a, i) =>
+    `فيديو ${i+1} (${a.name}):\n- هوك: ${a.analysis.hook_style}\n- لغة: ${a.analysis.language_style}\n- إيقاع: ${a.analysis.pacing}`
+  ).join('\n\n');
+
+  const prompt = `بناءً على تحليل ${analyses.length} فيديوهات من قناة تك عربي:
+
+${summary}
+
+استخرج الأنماط المشتركة بين كل الفيديوهات — يعني الأشياء اللي بتتكرر في كل الفيديوهات وبتمثل "DNA القناة".
+
+أرجع JSON فقط:
+{
+  "patterns": [
+    {"icon": "⚡", "text": "نمط مشترك واضح بين الفيديوهات"},
+    {"icon": "💬", "text": "نمط لغوي مشترك"},
+    {"icon": "🎵", "text": "نمط إيقاعي مشترك"},
+    {"icon": "🏗️", "text": "نمط بنيوي مشترك"}
+  ]
+}`;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3, max_tokens: 600
+      })
+    });
+    const data = await res.json();
+    const raw = data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+// ══════════════════════════════════════
+//  RENDER RESULTS
+// ══════════════════════════════════════
+function renderResults(patterns) {
+  const done = files.filter(f => f.status === 'done');
+  const totalRules = done.reduce((s, f) => s + f.rules.length, 0);
+
+  // Summary banner
+  document.getElementById('summaryBanner').innerHTML = `
+    <div class="summary-stat"><div class="summary-num">${done.length}</div><div class="summary-lbl">فيديو حُلِّل</div></div>
+    <div class="summary-divider"></div>
+    <div class="summary-stat"><div class="summary-num">${totalRules}</div><div class="summary-lbl">قاعدة مستخرجة</div></div>
+    ${patterns ? `<div class="summary-divider"></div><div class="summary-stat"><div class="summary-num">${patterns.patterns?.length||0}</div><div class="summary-lbl">نمط مشترك</div></div>` : ''}
+    <div class="summary-actions">
+      <button class="btn-save-all" onclick="saveAllRules()">💾 احفظ كل القواعد في Brain</button>
+      <button class="btn-new" onclick="resetAll()">↺ تحليل جديد</button>
+    </div>
+  `;
+
+  // Comparison
+  if (patterns?.patterns?.length) {
+    document.getElementById('comparisonCard').style.display = 'block';
+    document.getElementById('comparisonBody').innerHTML = patterns.patterns.map(p => `
+      <div class="pattern-item">
+        <div class="pattern-icon">${p.icon}</div>
+        <div class="pattern-text">${p.text}</div>
+      </div>
+    `).join('');
+  }
+
+  // Per-video results
+  document.getElementById('videoResults').innerHTML = files.map((f, i) => {
+    if (f.status !== 'done' || !f.analysis) return `
+      <div class="video-result">
+        <div class="vr-header" style="cursor:default">
+          <div class="vr-num">${i+1}</div>
+          <div class="vr-title">${f.name}</div>
+          <div class="vr-badge" style="background:rgba(239,68,68,.12);color:var(--red)">❌ خطأ</div>
+        </div>
+      </div>`;
+
+    const a = f.analysis;
+    const analysisItems = [
+      { title:'⚡ أسلوب الهوك', body: a.hook_style },
+      { title:'💬 اللغة', body: a.language_style },
+      { title:'🎵 الإيقاع', body: a.pacing },
+      { title:'📢 الـ CTA', body: a.cta_style },
+    ];
+
+    return `
+    <div class="video-result">
+      <div class="vr-header" onclick="toggleVR(${i})">
+        <div class="vr-num">${i+1}</div>
+        <div class="vr-title">${f.name}</div>
+        <div class="vr-badge done">✅ اكتمل</div>
+        <div class="vr-chevron" id="vchev-${i}">▾</div>
+      </div>
+      <div class="vr-body" id="vrbody-${i}">
+        ${f.transcript ? `
+        <div class="section-label">النص المستخرج</div>
+        <div class="transcript-box">${f.transcript}</div>` : ''}
+
+        <div class="section-label" style="margin-top:16px">تحليل الأسلوب</div>
+        <div class="analysis-grid">
+          ${analysisItems.map(it => `
+            <div class="analysis-item">
+              <div class="ai-title">${it.title}</div>
+              <div class="ai-body">${it.body || '—'}</div>
+            </div>`).join('')}
+        </div>
+
+        ${a.recurring_phrases?.length ? `
+        <div class="section-label" style="margin-top:14px">🔁 عبارات متكررة</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${a.recurring_phrases.map(p => `<span style="background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;color:#ccc">${p}</span>`).join('')}
+        </div>` : ''}
+
+        <div class="section-label" style="margin-top:16px">القواعد المستخرجة</div>
+        <div class="rules-grid" id="rules-${i}">
+          ${f.rules.map((r, ri) => `
+            <div class="rule-row">
+              <div class="rule-chk on" id="rchk-${i}-${ri}" onclick="toggleChk(${i},${ri})">✓</div>
+              <div>
+                <div class="rule-txt">${r.text}</div>
+                <div class="rule-cat">${r.category}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <button class="vr-save-btn" id="vsave-${i}" onclick="saveVideoRules(${i})">
+          💾 احفظ القواعد المختارة في Style Brain
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('resultsSection').classList.add('visible');
+  document.getElementById('resultsSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function toggleVR(i) {
+  const body = document.getElementById(`vrbody-${i}`);
+  const chev = document.getElementById(`vchev-${i}`);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleChk(fi, ri) {
+  const el = document.getElementById(`rchk-${fi}-${ri}`);
+  el.classList.toggle('on');
+  el.textContent = el.classList.contains('on') ? '✓' : '';
+}
+
+// ══════════════════════════════════════
+//  SAVE TO BRAIN
+// ══════════════════════════════════════
+function saveVideoRules(fi) {
+  const f = files[fi];
+  const selected = f.rules.filter((_, ri) =>
+    document.getElementById(`rchk-${fi}-${ri}`)?.classList.contains('on')
+  );
+  if (!selected.length) { showToast('⚠️','اختر قاعدة وحدة على الأقل!'); return; }
+  pushRulesToBrain(selected, f.name);
+  const btn = document.getElementById(`vsave-${fi}`);
+  btn.textContent = `✅ تم حفظ ${selected.length} قاعدة!`;
+  btn.disabled = true;
+}
+
+function saveAllRules() {
+  const allRules = [];
+  files.forEach(f => {
+    if (f.status === 'done') allRules.push(...f.rules.map(r => ({...r, source: f.name})));
+  });
+  if (!allRules.length) { showToast('⚠️','ما في قواعد للحفظ'); return; }
+  pushRulesToBrain(allRules, 'كل الفيديوهات');
+  showToast('✅', `تم حفظ ${allRules.length} قاعدة في Style Brain!`);
+}
+
+function pushRulesToBrain(rules, source) {
+  const existing = JSON.parse(localStorage.getItem('ta_brain_rules') || '[]');
+  const newRules = rules.map(r => ({
+    id: Date.now() + Math.random(),
+    text: r.text,
+    category: r.category || 'style',
+    icon: '🔬',
+    example: '',
+    pinned: false,
+    source: `محلل الفيديو · ${source}`,
+    date: new Date().toLocaleDateString('ar')
+  }));
+  localStorage.setItem('ta_brain_rules', JSON.stringify([...existing, ...newRules]));
+  showToast('✅', `تم الحفظ في Style Brain!`);
+}
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function setFileStatus(i, status, prog) {
+  files[i].status = status;
+  const row = document.getElementById(`frow-${i}`);
+  const lbl = document.getElementById(`fstatus-${i}`);
+  const bar = document.getElementById(`fprog-${i}`);
+  if (row) { row.className = `file-row ${status}`; }
+  if (lbl) { lbl.className = `file-status status-${status}`; lbl.textContent = statusLabel(status); }
+  if (bar) bar.style.width = prog + '%';
+}
+
+function setGlobalProgress(pct) {
+  document.getElementById('gpFill').style.width = pct + '%';
+}
+
+function resetAll() {
+  files = []; analyzing = false;
+  renderFileList();
+  updateUI();
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('comparisonCard').style.display = 'none';
+  document.getElementById('globalProgress').classList.remove('visible');
+  zone.style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+let toastTimer;
+function showToast(icon, msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;border:1px solid #333;color:#f0f0f0;padding:12px 20px;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 3500);
+}
+</script>
+</body>
+</html>

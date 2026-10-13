@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تك عربي | معالج الصور المتقدم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF6B00; --orange-light: #FF8C33; --orange-glow: rgba(255,107,0,0.18);
+  --black: #0A0A0A; --dark: #111; --card: #181818; --border: #2a2a2a;
+  --text: #F0F0F0; --muted: #888;
+  --green: #22c55e; --red: #ef4444; --yellow: #eab308;
+  --blue: #3b82f6; --purple: #a855f7;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--black); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; overflow-x:hidden; }
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image: linear-gradient(rgba(255,107,0,0.04) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,107,0,0.04) 1px,transparent 1px);
+  background-size:40px 40px; pointer-events:none; z-index:0;
+}
+
+/* ── MAIN ── */
+main { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:48px 24px 80px; }
+.hero { text-align:center; margin-bottom:48px; }
+.hero h1 { font-size:clamp(28px,4vw,44px); font-weight:900; line-height:1.2; margin-bottom:12px; }
+.hero h1 span { color:var(--orange); }
+.hero p { color:var(--muted); font-size:16px; }
+
+/* ── UPLOAD ── */
+.upload-zone {
+  border:2px dashed var(--border); border-radius:20px; padding:60px 40px;
+  text-align:center; cursor:pointer; transition:all 0.25s;
+  background:var(--card); position:relative; overflow:hidden;
+}
+.upload-zone::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,var(--orange-glow) 0%,transparent 70%); opacity:0; transition:opacity 0.3s; }
+.upload-zone:hover,.upload-zone.drag-over { border-color:var(--orange); transform:translateY(-2px); box-shadow:0 0 40px var(--orange-glow); }
+.upload-zone:hover::before,.upload-zone.drag-over::before { opacity:1; }
+.upload-icon { font-size:56px; margin-bottom:16px; display:block; }
+.upload-zone h2 { font-size:20px; font-weight:700; margin-bottom:8px; }
+.upload-zone p { color:var(--muted); font-size:14px; margin-bottom:16px; }
+.upload-formats { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+.format-badge { background:#1e1e1e; border:1px solid var(--border); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:700; color:var(--muted); }
+.format-badge.img { color:var(--orange); border-color:rgba(255,107,0,0.3); }
+.format-badge.vid { color:var(--purple); border-color:rgba(168,85,247,0.3); }
+.btn-upload { background:var(--orange); color:white; border:none; padding:12px 32px; border-radius:12px; font-family:'Cairo',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; position:relative; z-index:1; }
+.btn-upload:hover { background:var(--orange-light); transform:scale(1.04); }
+#fileInput { display:none; }
+
+/* ── SELECTED FILES ── */
+.selected-files { display:none; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px 24px; margin-top:16px; }
+.selected-files.visible { display:block; }
+.selected-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.selected-header h3 { font-size:15px; font-weight:700; }
+.file-count { background:var(--orange-glow); border:1px solid var(--orange); color:var(--orange); padding:3px 12px; border-radius:20px; font-size:13px; font-weight:700; }
+.file-list { display:flex; flex-wrap:wrap; gap:8px; max-height:120px; overflow-y:auto; }
+.file-chip { background:#222; border:1px solid var(--border); border-radius:8px; padding:5px 12px; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.file-chip.img-chip { border-color:rgba(255,107,0,0.3); }
+.file-chip.vid-chip { border-color:rgba(168,85,247,0.3); }
+.chip-ext { font-weight:700; text-transform:uppercase; }
+.img-chip .chip-ext { color:var(--orange); }
+.vid-chip .chip-ext { color:var(--purple); }
+
+/* ── OPTIONS PANEL ── */
+.options-panel { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px 32px; margin-top:24px; }
+.options-title { font-size:17px; font-weight:900; margin-bottom:22px; }
+.options-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:14px; }
+.option-item { display:flex; align-items:center; justify-content:space-between; background:#111; border:1px solid var(--border); border-radius:14px; padding:14px 18px; gap:12px; transition:border-color 0.2s; }
+.option-item:hover { border-color:var(--orange); }
+.option-info { display:flex; align-items:center; gap:12px; flex:1; }
+.option-icon { font-size:22px; line-height:1; }
+.option-name { font-size:14px; font-weight:700; color:var(--text); }
+.option-desc { font-size:11px; color:var(--muted); margin-top:2px; }
+.toggle-switch { position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#333; border-radius:26px; transition:0.3s; }
+.toggle-slider::before { content:''; position:absolute; height:20px; width:20px; left:3px; bottom:3px; background:#666; border-radius:50%; transition:0.3s; }
+input:checked + .toggle-slider { background:var(--orange); }
+input:checked + .toggle-slider::before { background:white; transform:translateX(22px); }
+
+/* ── PROCESS BTN ── */
+.process-wrap { display:none; margin-top:24px; text-align:center; }
+.process-wrap.visible { display:block; }
+.btn-process { background:linear-gradient(135deg,var(--orange),#ff3d00); color:white; border:none; padding:16px 56px; border-radius:14px; font-family:'Cairo',sans-serif; font-size:17px; font-weight:900; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 24px rgba(255,107,0,0.35); }
+.btn-process:hover { transform:translateY(-2px) scale(1.03); }
+.btn-process:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* ── PROGRESS ── */
+.progress-section { display:none; margin-top:32px; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px 32px; }
+.progress-section.visible { display:block; }
+.progress-label { display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px; }
+.progress-label span:first-child { font-weight:700; }
+.progress-label span:last-child { color:var(--orange); font-weight:700; }
+.progress-bar-track { background:#222; border-radius:100px; height:10px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--orange-light)); border-radius:100px; width:0%; transition:width 0.4s ease; box-shadow:0 0 10px var(--orange-glow); }
+.progress-counter { text-align:center; margin-top:12px; font-size:13px; color:var(--muted); }
+.progress-counter span { color:var(--orange); font-weight:700; }
+
+/* ── REVIEW SECTION ── */
+#reviewSection { display:none; margin-top:32px; }
+.review-header { background:var(--card); border:1px solid var(--orange); border-radius:16px; padding:20px 28px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.review-header-left h2 { font-size:18px; font-weight:900; margin-bottom:4px; }
+.review-header-left p { font-size:13px; color:var(--muted); }
+.review-info { background:var(--orange-glow); border:1px solid var(--orange); color:var(--orange); padding:6px 18px; border-radius:20px; font-size:14px; font-weight:700; }
+.review-toolbar { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+.btn-sel-all { background:var(--orange); color:white; border:none; border-color:var(--orange); padding:9px 20px; border-radius:10px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; border:1.5px solid var(--orange); }
+.btn-sel-all:hover { background:var(--orange-light); }
+.btn-desel-all { background:transparent; color:var(--muted); border:1.5px solid var(--border); padding:9px 20px; border-radius:10px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.btn-desel-all:hover { border-color:var(--red); color:var(--red); }
+
+/* ── TABS ── */
+.tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:24px; gap:4px; }
+.tab { padding:12px 22px; font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer; border:none; background:none; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+.tab-count { background:#222; border-radius:20px; padding:2px 9px; font-size:12px; }
+.tab.active .tab-count { background:var(--orange-glow); color:var(--orange); border:1px solid var(--orange); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── COMPARISON CARDS GRID ── */
+.compare-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; margin-bottom:20px; }
+.compare-grid.reels-grid { grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); }
+
+/* ── REVIEW CARD ── */
+.review-card { border:2px solid var(--green); border-radius:14px; overflow:hidden; cursor:pointer; transition:all 0.2s; background:var(--card); }
+.review-card.deselected { border-color:var(--border); opacity:0.45; }
+.review-card:hover { transform:translateY(-2px); }
+
+/* ── BEFORE/AFTER COMPARISON ── */
+.compare-wrap { position:relative; overflow:hidden; user-select:none; }
+.compare-wrap.photos-ar { aspect-ratio:3/2; }
+.compare-wrap.reels-ar  { aspect-ratio:9/16; }
+.img-before { display:block; width:100%; height:100%; object-fit:cover; }
+.img-after-clip { position:absolute; inset:0; clip-path:inset(0 50% 0 0); }
+.img-after-clip img { width:100%; height:100%; object-fit:cover; display:block; }
+.compare-divider { position:absolute; top:0; bottom:0; left:50%; width:2px; background:white; transform:translateX(-50%); pointer-events:none; box-shadow:0 0 6px rgba(0,0,0,0.5); }
+.compare-divider::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26px; height:26px; border-radius:50%; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
+.cmp-tag { position:absolute; top:8px; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:900; color:white; pointer-events:none; }
+.cmp-before-tag { right:10px; background:rgba(0,0,0,0.65); }
+.cmp-after-tag  { left:10px;  background:rgba(255,107,0,0.85); }
+.compare-range { position:absolute; inset:0; opacity:0; cursor:col-resize; width:100%; height:100%; margin:0; padding:0; }
+.rc-badge { position:absolute; top:8px; left:50%; transform:translateX(-50%); /* overridden per card */ right:unset; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; background:var(--green); color:white; box-shadow:0 2px 8px rgba(0,0,0,0.4); pointer-events:none; top:8px; right:8px; left:unset; }
+.review-card.deselected .rc-badge { background:#333; color:var(--muted); }
+
+.review-card-info { padding:10px 12px; border-top:1px solid var(--border); background:#111; display:flex; align-items:center; justify-content:space-between; }
+.review-card-name { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+
+/* ── VIDEOS LIST ── */
+.videos-header { font-size:14px; font-weight:700; color:var(--muted); margin:16px 0 10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.video-list { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.video-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; }
+.video-icon { font-size:24px; }
+.video-name { font-size:13px; font-weight:700; }
+.video-cat  { font-size:11px; color:var(--purple); font-weight:700; margin-top:2px; }
+
+/* ── APPROVE BAR ── */
+.approve-bar { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:8px; }
+.approve-bar label { font-size:14px; font-weight:700; white-space:nowrap; }
+.approve-bar input { flex:1; min-width:200px; background:#111; border:1.5px solid var(--border); border-radius:10px; padding:11px 16px; font-family:'Cairo',sans-serif; font-size:14px; color:var(--text); outline:none; }
+.approve-bar input:focus { border-color:var(--orange); }
+.btn-approve { background:linear-gradient(135deg,var(--green),#16a34a); color:white; border:none; padding:12px 28px; border-radius:12px; font-family:'Cairo',sans-serif; font-size:15px; font-weight:900; cursor:pointer; transition:all 0.25s; white-space:nowrap; box-shadow:0 4px 16px rgba(34,197,94,0.3); }
+.btn-approve:hover { transform:translateY(-1px); }
+.btn-approve:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+.approve-success { display:none; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:var(--green); border-radius:12px; padding:16px 22px; font-size:14px; font-weight:700; margin-top:14px; }
+.approve-success.visible { display:block; }
+
+/* ── AFTER SECTION ── */
+#afterSection { display:none; margin-top:32px; }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; }
+.stat-card.orange { border-color:rgba(255,107,0,0.3); }
+.stat-card.green  { border-color:rgba(34,197,94,0.3); }
+.stat-card.blue   { border-color:rgba(59,130,246,0.3); }
+.stat-card.purple { border-color:rgba(168,85,247,0.3); }
+.stat-number { font-size:36px; font-weight:900; line-height:1; margin-bottom:6px; }
+.stat-card.orange .stat-number { color:var(--orange); }
+.stat-card.green  .stat-number { color:var(--green); }
+.stat-card.blue   .stat-number { color:var(--blue); }
+.stat-card.purple .stat-number { color:var(--purple); }
+.stat-label { font-size:13px; color:var(--muted); font-weight:600; }
+.download-wrap { text-align:center; margin-top:28px; }
+.btn-download { background:linear-gradient(135deg,var(--green),#16a34a); color:white; border:none; padding:16px 48px; border-radius:14px; font-family:'Cairo',sans-serif; font-size:16px; font-weight:900; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 24px rgba(34,197,94,0.3); }
+.btn-download:hover { transform:translateY(-2px) scale(1.03); }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
+.empty-state span { font-size:48px; display:block; margin-bottom:12px; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 24px; font-size:14px; font-weight:700; z-index:9999; transition:transform 0.35s cubic-bezier(.34,1.56,.64,1); display:flex; align-items:center; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.5); white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ── FOOTER ── */
+.site-footer { position:relative; z-index:10; background:#0d0d0d; border-top:1px solid var(--border); padding:14px 40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.footer-social { display:flex; align-items:center; gap:18px; }
+.footer-social a { color:#aaa; text-decoration:none; transition:color 0.2s; display:flex; align-items:center; }
+.footer-social a:hover { color:#fff; }
+.footer-social svg { width:18px; height:18px; fill:currentColor; }
+.footer-links { display:flex; align-items:center; gap:28px; }
+.footer-links a { color:#aaa; font-size:13px; font-weight:600; text-decoration:none; transition:color 0.2s; }
+.footer-links a:hover { color:var(--orange); }
+
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--black); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--orange); }
+
+@media(max-width:600px) {
+  main { padding:28px 16px 60px; }
+  .stats-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .stat-number { font-size:26px; }
+  .upload-zone { padding:40px 20px; }
+  .options-grid { grid-template-columns:1fr; }
+  .site-footer { padding:14px 16px; }
+}
+</style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main>
+  <div class="hero">
+    <h1>معالج الصور <span>المتقدم</span></h1>
+    <p>ارفع صورك وفيديوهاتك — راجع الفرق Before/After وصنّفها تلقائياً</p>
+  </div>
+
+  <!-- ── UPLOAD ── -->
+  <div class="upload-zone" id="uploadZone">
+    <span class="upload-icon">📁</span>
+    <h2>اسحب الملفات هنا</h2>
+    <div class="upload-formats">
+      <span class="format-badge img">JPG</span>
+      <span class="format-badge img">PNG</span>
+      <span class="format-badge vid">MP4</span>
+      <span class="format-badge vid">MOV</span>
+    </div>
+    <p>صور وفيديوهات معاً مدعومة</p>
+    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">اختر الملفات</button>
+    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.mp4,.mov">
+  </div>
+
+  <!-- ── SELECTED FILES ── -->
+  <div class="selected-files" id="selectedFiles">
+    <div class="selected-header">
+      <h3>الملفات المحددة</h3>
+      <span class="file-count" id="fileCount">0 ملف</span>
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <!-- ── OPTIONS PANEL ── -->
+  <div class="options-panel" id="optionsPanel" style="display:none">
+    <div class="options-title">⚙️ خيارات المعالجة</div>
+    <div class="options-grid">
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">💡</span>
+          <div>
+            <div class="option-name">تصحيح الإضاءة</div>
+            <div class="option-desc">CLAHE لتوزيع الإضاءة تلقائياً</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_auto_lighting" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">🎨</span>
+          <div>
+            <div class="option-name">توازن الألوان (WB)</div>
+            <div class="option-desc">تصحيح White Balance تلقائياً</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_auto_wb" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">🔇</span>
+          <div>
+            <div class="option-name">تقليل الضوضاء</div>
+            <div class="option-desc">Noise Reduction للصور المظلمة</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_denoise"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">📐</span>
+          <div>
+            <div class="option-name">تعديل الأفق</div>
+            <div class="option-desc">Horizon straightening تلقائي</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_straighten"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">🤳</span>
+          <div>
+            <div class="option-name">Crop ذكي للوجه</div>
+            <div class="option-desc">اكتشاف الوجه وتقطيع ذكي</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_face_crop"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">↔️</span>
+          <div>
+            <div class="option-name">قلب أفقي</div>
+            <div class="option-desc">Mirror الصورة يميناً / يساراً</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_flip_h"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">↕️</span>
+          <div>
+            <div class="option-name">قلب عمودي</div>
+            <div class="option-desc">Flip الصورة أعلى / أسفل</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_flip_v"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-icon">🔖</span>
+          <div>
+            <div class="option-name">إضافة الشعار</div>
+            <div class="option-desc">Watermark شفاف في الزاوية</div>
+          </div>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="opt_watermark"><span class="toggle-slider"></span></label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PROCESS BTN ── -->
+  <div class="process-wrap" id="processWrap">
+    <button class="btn-process" id="processBtn" onclick="startProcessing()">
+      🚀 ابدأ المعالجة والتصنيف
+    </button>
+  </div>
+
+  <!-- ── PROGRESS ── -->
+  <div class="progress-section" id="progressSection">
+    <div class="progress-label">
+      <span id="progressText">جاري الرفع...</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-counter" id="progressCounter" style="display:none">
+      تمت معالجة <span id="doneCount">0</span> من <span id="totalCount">0</span> ملف
+    </div>
+  </div>
+
+  <!-- ── REVIEW SECTION ── -->
+  <div id="reviewSection">
+    <div class="review-header">
+      <div class="review-header-left">
+        <h2>🖼️ راجع الصور قبل الحفظ</h2>
+        <p>اسحب الفاصل الأبيض ◁▷ لترى الفرق · اضغط على الصورة للحذف</p>
+      </div>
+      <div class="review-info" id="reviewInfo">0 / 0 محددة</div>
+    </div>
+
+    <div class="review-toolbar">
+      <button class="btn-sel-all"   onclick="selectAll()">✅ تحديد الكل</button>
+      <button class="btn-desel-all" onclick="deselectAll()">🗑️ إلغاء الكل</button>
+    </div>
+
+    <div class="tabs" id="reviewTabs">
+      <button class="tab active" id="rtab-photos" onclick="switchReviewTab('photos', this)">
+        📷 PHOTOS <span class="tab-count" id="rtc-photos">0</span>
+      </button>
+      <button class="tab" id="rtab-reels" onclick="switchReviewTab('reels', this)">
+        📱 REELS <span class="tab-count" id="rtc-reels">0</span>
+      </button>
+    </div>
+
+    <div class="tab-panel active" id="rpanel-photos">
+      <div class="compare-grid" id="rgrid-photos"></div>
+    </div>
+    <div class="tab-panel" id="rpanel-reels">
+      <div class="compare-grid reels-grid" id="rgrid-reels"></div>
+    </div>
+
+    <!-- Videos (no before/after, just listed) -->
+    <div id="videos-review" style="display:none">
+      <div class="videos-header">🎬 فيديوهات — ستُحفظ جميعها كما هي</div>
+      <div class="video-list" id="videos-list"></div>
+    </div>
+
+    <!-- Save Bar -->
+    <div class="approve-bar">
+      <label>📁 اسم الأيفنت:</label>
+      <input type="text" id="eventNameInput" placeholder="مثال: Tech3arabi_June2025" dir="ltr">
+      <button class="btn-approve" id="btnApprove" onclick="approveSelected()">💾 حفظ المحددة</button>
+    </div>
+    <div class="approve-success" id="approveSuccess"></div>
+  </div>
+
+  <!-- ── AFTER APPROVE ── -->
+  <div id="afterSection">
+    <div class="stats-grid" id="statsGrid" style="display:none">
+      <div class="stat-card orange">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">📁 إجمالي الملفات</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number" id="statSaved">0</div>
+        <div class="stat-label">✅ محفوظة</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-number" id="statReels">0</div>
+        <div class="stat-label">📱 REELS</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-number" id="statVideos">0</div>
+        <div class="stat-label">🎬 فيديوهات</div>
+      </div>
+    </div>
+    <div class="download-wrap" id="downloadWrap" style="display:none">
+      <button class="btn-download" onclick="downloadAll()">
+        📦 تحميل الكل (REELS + PHOTOS) ZIP
+      </button>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-social">
+    <a href="https://www.instagram.com/tech3arabi/" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UCE8CiAZGzMrTHnBEZaAqFWg" target="_blank"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="https://tech3arabi.com/" target="_blank">الموقع الرسمي</a>
+    <a href="https://network.tech3arabi.com/" target="_blank">الشبكة</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast">
+  <span id="toastIcon">ℹ️</span>
+  <span id="toastMsg">رسالة</span>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let selectedFiles = [];
+let currentSession = null;
+let pollTimer = null;
+let reviewItems = [];   // {name, category, selected}
+let reviewJobData = null;
+
+const IMGS = new Set(['.jpg','.jpeg','.png']);
+const VIDS = new Set(['.mp4','.mov']);
+
+// ── FILE SELECTION ─────────────────────────────────────────────────────────
+const fileInput  = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+uploadZone.addEventListener('dragover',  e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+function ext(name) { return '.' + name.split('.').pop().toLowerCase(); }
+
+function handleFiles(files) {
+  const valid = Array.from(files).filter(f => IMGS.has(ext(f.name)) || VIDS.has(ext(f.name)));
+  if (!valid.length) { showToast('❌', 'لا يوجد ملفات صالحة (JPG/PNG/MP4/MOV)'); return; }
+  selectedFiles = valid;
+  const imgs = valid.filter(f => IMGS.has(ext(f.name))).length;
+  const vids = valid.filter(f => VIDS.has(ext(f.name))).length;
+  const parts = [];
+  if (imgs) parts.push(`${imgs} صورة`);
+  if (vids) parts.push(`${vids} فيديو`);
+  document.getElementById('fileCount').textContent = parts.join(' + ');
+  document.getElementById('fileList').innerHTML = valid.map(f => {
+    const e = f.name.split('.').pop().toUpperCase();
+    const t = VIDS.has(ext(f.name)) ? 'vid-chip' : 'img-chip';
+    const n = f.name.length > 22 ? f.name.substring(0,20)+'...' : f.name;
+    return `<div class="file-chip ${t}"><span class="chip-ext">${e}</span>${n}</div>`;
+  }).join('');
+  document.getElementById('selectedFiles').classList.add('visible');
+  document.getElementById('optionsPanel').style.display = 'block';
+  document.getElementById('processWrap').classList.add('visible');
+}
+
+function getOpts() {
+  return {
+    auto_lighting: document.getElementById('opt_auto_lighting').checked,
+    auto_wb:       document.getElementById('opt_auto_wb').checked,
+    denoise:       document.getElementById('opt_denoise').checked,
+    straighten:    document.getElementById('opt_straighten').checked,
+    face_crop:     document.getElementById('opt_face_crop').checked,
+    flip_h:        document.getElementById('opt_flip_h').checked,
+    flip_v:        document.getElementById('opt_flip_v').checked,
+    watermark:     document.getElementById('opt_watermark').checked,
+  };
+}
+
+// ── PROCESSING ─────────────────────────────────────────────────────────────
+async function startProcessing() {
+  if (!selectedFiles.length) return;
+  const btn = document.getElementById('processBtn');
+  btn.disabled = true;
+
+  document.getElementById('progressSection').classList.add('visible');
+  document.getElementById('reviewSection').style.display = 'none';
+  document.getElementById('afterSection').style.display  = 'none';
+  document.getElementById('progressCounter').style.display = 'none';
+  setBar(5, 'جاري رفع الملفات...');
+
+  const opts = getOpts();
+  const fd = new FormData();
+  selectedFiles.forEach(f => fd.append('files', f));
+  Object.entries(opts).forEach(([k,v]) => fd.append(k, v));
+
+  try {
+    const res  = await fetch('/processor/upload', { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.error) { showToast('❌', data.error); btn.disabled = false; return; }
+
+    setBar(15, 'بدأت المعالجة...');
+    document.getElementById('progressCounter').style.display = 'block';
+    document.getElementById('totalCount').textContent = data.total;
+    pollJob(data.job_id, data.total, btn);
+
+  } catch(e) {
+    showToast('❌', 'خطأ في الاتصال');
+    btn.disabled = false;
+  }
+}
+
+function pollJob(jobId, total, btn) {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(`/processor/status/${jobId}`);
+      const job = await res.json();
+
+      const pct = Math.min(15 + Math.round((job.progress / total) * 80), 95);
+      setBar(pct, 'جاري المعالجة والتصنيف...');
+      document.getElementById('doneCount').textContent = job.progress;
+
+      if (job.status === 'done') {
+        clearInterval(pollTimer);
+        setBar(100, 'اكتمل! جاري تحميل المعاينات...');
+        currentSession  = job.session_id;
+        reviewJobData   = job;
+        buildReviewSection(job);
+        btn.disabled = false;
+        showToast('✅', `تمت المعالجة! راجع الصور قبل الحفظ`);
+      } else if (job.status === 'error') {
+        clearInterval(pollTimer);
+        showToast('❌', job.error || 'خطأ في المعالجة');
+        btn.disabled = false;
+      }
+    } catch(e) { /* keep polling on blip */ }
+  }, 1500);
+}
+
+function setBar(pct, text) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent  = pct + '%';
+  document.getElementById('progressText').textContent = text;
+}
+
+// ── REVIEW SECTION ─────────────────────────────────────────────────────────
+let cardCounter = 0;
+
+function buildReviewSection(job) {
+  const r = job.results;
+  reviewItems = [];
+  cardCounter = 0;
+
+  // Collect all images with their category
+  (r.photos || []).forEach(n => reviewItems.push({ name: n, category: 'PHOTOS', selected: true }));
+  (r.reels  || []).forEach(n => reviewItems.push({ name: n, category: 'REELS',  selected: true }));
+
+  const photosItems = reviewItems.filter(i => i.category === 'PHOTOS');
+  const reelsItems  = reviewItems.filter(i => i.category === 'REELS');
+
+  document.getElementById('rtc-photos').textContent = photosItems.length;
+  document.getElementById('rtc-reels').textContent  = reelsItems.length;
+
+  buildGrid('rgrid-photos', photosItems);
+  buildGrid('rgrid-reels',  reelsItems);
+
+  // Videos
+  const allVids = [...(r.videos_photos||[]).map(n=>({n,c:'PHOTOS'})), ...(r.videos_reels||[]).map(n=>({n,c:'REELS'}))];
+  if (allVids.length) {
+    document.getElementById('videos-list').innerHTML = allVids.map(v => `
+      <div class="video-item">
+        <span class="video-icon">🎬</span>
+        <div>
+          <div class="video-name">${v.n}</div>
+          <div class="video-cat">${v.c}</div>
+        </div>
+      </div>`).join('');
+    document.getElementById('videos-review').style.display = 'block';
+  }
+
+  updateReviewInfo();
+  document.getElementById('reviewSection').style.display = 'block';
+  document.getElementById('reviewSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function buildGrid(gridId, items) {
+  const grid = document.getElementById(gridId);
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span>📭</span>لا يوجد صور في هذه الفئة</div>`;
+    return;
+  }
+  grid.innerHTML = items.map(item => makeCard(item)).join('');
+}
+
+function makeCard(item) {
+  const idx     = cardCounter++;
+  const isReels = item.category === 'REELS';
+  const arClass = isReels ? 'reels-ar' : 'photos-ar';
+  const afterId = `aft-${idx}`;
+  const divId   = `div-${idx}`;
+  const cardId  = `rc-${idx}`;
+
+  // Store idx on the item so toggle can find it
+  item._idx = idx;
+
+  const origUrl = `/processor/original/${currentSession}/${encodeURIComponent(item.name)}`;
+  const procUrl = `/processor/preview/${currentSession}/${item.category}/${encodeURIComponent(item.name)}`;
+
+  return `
+    <div class="review-card" id="${cardId}" onclick="toggleCard(${idx})">
+      <div class="compare-wrap ${arClass}">
+        <img class="img-before" src="${origUrl}" loading="lazy" alt="قبل"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23222%22/></svg>'">
+        <div class="img-after-clip" id="${afterId}">
+          <img src="${procUrl}" loading="lazy" alt="بعد"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23333%22/></svg>'">
+        </div>
+        <div class="compare-divider" id="${divId}"></div>
+        <span class="cmp-tag cmp-before-tag">قبل</span>
+        <span class="cmp-tag cmp-after-tag">بعد</span>
+        <input type="range" class="compare-range" value="50"
+               oninput="moveSlider(this,'${afterId}','${divId}')"
+               onclick="event.stopPropagation()">
+        <div class="rc-badge" id="badge-${idx}">✓</div>
+      </div>
+      <div class="review-card-info">
+        <div class="review-card-name">${item.name}</div>
+      </div>
+    </div>`;
+}
+
+function moveSlider(input, afterId, divId) {
+  const pct = input.value;
+  document.getElementById(afterId).style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+  document.getElementById(divId).style.left = `${pct}%`;
+}
+
+function toggleCard(idx) {
+  const item = reviewItems[idx];
+  if (!item) return;
+  item.selected = !item.selected;
+  const card  = document.getElementById(`rc-${idx}`);
+  const badge = document.getElementById(`badge-${idx}`);
+  if (item.selected) {
+    card.classList.remove('deselected');
+    badge.textContent = '✓';
+  } else {
+    card.classList.add('deselected');
+    badge.textContent = '○';
+  }
+  updateReviewInfo();
+}
+
+function selectAll() {
+  reviewItems.forEach((item, idx) => {
+    item.selected = true;
+    document.getElementById(`rc-${idx}`)?.classList.remove('deselected');
+    const b = document.getElementById(`badge-${idx}`);
+    if (b) b.textContent = '✓';
+  });
+  updateReviewInfo();
+}
+
+function deselectAll() {
+  reviewItems.forEach((item, idx) => {
+    item.selected = false;
+    document.getElementById(`rc-${idx}`)?.classList.add('deselected');
+    const b = document.getElementById(`badge-${idx}`);
+    if (b) b.textContent = '○';
+  });
+  updateReviewInfo();
+}
+
+function updateReviewInfo() {
+  const sel = reviewItems.filter(i => i.selected).length;
+  document.getElementById('reviewInfo').textContent = `${sel} / ${reviewItems.length} محددة`;
+}
+
+function switchReviewTab(name, btn) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`rpanel-${name}`).classList.add('active');
+}
+
+// ── APPROVE ────────────────────────────────────────────────────────────────
+async function approveSelected() {
+  const selected   = reviewItems.filter(i => i.selected).map(i => ({ name: i.name, category: i.category }));
+  const eventName  = document.getElementById('eventNameInput').value.trim();
+
+  if (!selected.length) { showToast('❌', 'ما في صور محددة!'); return; }
+  if (!eventName)        { showToast('⚠️', 'حط اسم الأيفنت أول'); document.getElementById('eventNameInput').focus(); return; }
+
+  const btn = document.getElementById('btnApprove');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الحفظ...';
+
+  try {
+    const res  = await fetch('/processor/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: currentSession, approved: selected, event_name: eventName }),
+    });
+    const data = await res.json();
+
+    if (data.error) { showToast('❌', data.error); btn.disabled = false; btn.textContent = '💾 حفظ المحددة'; return; }
+
+    const msg = `✅ تم حفظ ${data.saved} ملف في أيفنت "${eventName}"`;
+    document.getElementById('approveSuccess').textContent = msg;
+    document.getElementById('approveSuccess').classList.add('visible');
+    showToast('✅', msg);
+
+    // Show after section
+    const s = reviewJobData.stats;
+    const vids = (s.videos_reels || 0) + (s.videos_photos || 0);
+    document.getElementById('statTotal').textContent  = s.total;
+    document.getElementById('statSaved').textContent  = data.saved;
+    document.getElementById('statReels').textContent  = s.reels;
+    document.getElementById('statVideos').textContent = vids;
+    document.getElementById('statsGrid').style.display   = 'grid';
+    document.getElementById('downloadWrap').style.display = 'block';
+    document.getElementById('afterSection').style.display = 'block';
+
+  } catch(e) {
+    showToast('❌', 'خطأ في الاتصال');
+    btn.disabled = false;
+    btn.textContent = '💾 حفظ المحددة';
+  }
+}
+
+function downloadAll() {
+  if (currentSession) window.location.href = `/processor/download/${currentSession}`;
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(icon, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMsg').textContent  = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

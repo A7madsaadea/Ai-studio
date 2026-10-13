@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تك عربي | مولّد السكريبتات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00; --orange-light: #FF8C33;
+    --orange-glow: rgba(255,107,0,0.18);
+    --black: #0A0A0A; --card: #181818;
+    --border: #2a2a2a; --text: #F0F0F0;
+    --muted: #888; --green: #22c55e; --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--black); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(255,107,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,107,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+
+  main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+  .hero { text-align: center; margin-bottom: 36px; }
+  .hero h1 { font-size: clamp(26px,4vw,40px); font-weight: 900; margin-bottom: 10px; }
+  .hero h1 span { color: var(--orange); }
+  .hero p { color: var(--muted); font-size: 15px; }
+
+  /* PIPELINE INDICATOR */
+  .pipeline { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 36px; flex-wrap: wrap; }
+  .pipe-step { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: default; }
+  .pipe-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border: 2px solid var(--border); background: var(--card); color: var(--muted); transition: all 0.4s; }
+  .pipe-label { font-size: 11px; font-weight: 700; color: var(--muted); transition: color 0.4s; white-space: nowrap; }
+  .pipe-step.active .pipe-num { border-color: var(--orange); color: var(--orange); background: var(--orange-glow); box-shadow: 0 0 16px var(--orange-glow); }
+  .pipe-step.active .pipe-label { color: var(--orange); }
+  .pipe-step.done .pipe-num { border-color: var(--green); background: rgba(34,197,94,0.15); color: var(--green); }
+  .pipe-step.done .pipe-label { color: var(--green); }
+  .pipe-arrow { color: var(--border); font-size: 18px; margin: 0 8px; margin-bottom: 20px; transition: color 0.4s; }
+  .pipe-arrow.done { color: var(--green); }
+
+  /* FORM CARD */
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 24px; display: none; animation: fadeUp 0.35s ease; }
+  .form-card.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .form-card-title { font-size: 16px; font-weight: 900; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 14px; font-weight: 700; color: var(--text); }
+  .label-required { color: var(--orange); }
+  .label-opt { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .field-hint { font-size: 12px; color: var(--muted); }
+  input, textarea, select { background: #111; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 16px; font-family: 'Cairo', sans-serif; font-size: 14px; color: var(--text); transition: all 0.2s; outline: none; resize: none; }
+  input:focus, textarea:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-glow); }
+  select option { background: #111; }
+  .char-count { font-size: 12px; color: var(--muted); text-align: left; }
+
+  /* CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .chip:hover { border-color: var(--orange); color: var(--orange); }
+  .chip.selected { background: var(--orange-glow); border-color: var(--orange); color: var(--orange); }
+  .chip .ck { display: none; margin-right: 4px; }
+  .chip.selected .ck { display: inline; }
+
+  /* HOOK TYPE CARDS */
+  .hook-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hook-card { background: #111; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: flex-start; gap: 10px; }
+  .hook-card:hover { border-color: var(--orange); }
+  .hook-card.selected { border-color: var(--orange); background: var(--orange-glow); }
+  .hook-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .hook-title { font-size: 13px; font-weight: 900; margin-bottom: 3px; }
+  .hook-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* CAST */
+  .cast-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .cast-row input { flex: 1; }
+  .btn-add-cast, .btn-rm-cast { width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .btn-add-cast:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-rm-cast:hover { border-color: var(--red); color: var(--red); }
+
+  /* NAV BTNS */
+  .form-nav { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-next { flex: 1; background: linear-gradient(135deg, var(--orange), #ff3d00); color: white; border: none; padding: 16px; border-radius: 14px; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 900; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 24px rgba(255,107,0,0.35); }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,0,0.5); }
+  .btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-back { background: transparent; border: 1.5px solid var(--border); color: var(--muted); padding: 16px 24px; border-radius: 14px; font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-back:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* LOADING */
+  .loading { display: none; text-align: center; padding: 48px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 24px; }
+  .loading.visible { display: block; animation: fadeUp 0.3s ease; }
+  .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { font-size: 16px; font-weight: 900; margin-bottom: 8px; }
+  .loading-sub { color: var(--muted); font-size: 14px; }
+  .loading-sub span { color: var(--orange); font-weight: 700; }
+
+  /* ═══════════════════════════════════════════
+     HOOK SELECTION SECTION (المرحلة الأولى الجديدة)
+  ═══════════════════════════════════════════ */
+  .hook-select-section { display: none; animation: fadeUp 0.4s ease; }
+  .hook-select-section.visible { display: block; }
+
+  .hook-select-header { background: var(--card); border: 1px solid var(--border); border-radius: 20px 20px 0 0; padding: 24px 28px; border-bottom: 1px solid var(--border); }
+  .hook-select-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,107,0,0.12); border: 1px solid var(--orange); color: var(--orange); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+  .hook-select-title { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
+  .hook-select-sub { color: var(--muted); font-size: 13px; }
+
+  .hook-options { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 20px 20px; padding: 20px 28px 28px; display: flex; flex-direction: column; gap: 12px; }
+
+  .hook-option { border: 1.5px solid var(--border); border-radius: 16px; padding: 18px 20px; cursor: pointer; transition: all 0.25s; position: relative; background: #111; }
+  .hook-option:hover { border-color: var(--orange); background: rgba(255,107,0,0.05); transform: translateX(-3px); }
+  .hook-option.selected { border-color: var(--orange); background: var(--orange-glow); }
+  .hook-option.selected::before { content: '✓'; position: absolute; top: 16px; left: 18px; width: 26px; height: 26px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: white; display: flex; }
+  .hook-option-type { font-size: 11px; font-weight: 700; color: var(--orange); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .hook-option-text { font-size: 15px; font-weight: 700; line-height: 1.6; color: var(--text); }
+  .hook-option-why { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .hook-option.selected .hook-option-why { color: #bbb; }
+
+  .hook-regenerate { display: flex; align-items: center; gap: 8px; background: transparent; border: 1.5px solid var(--border); color: var(--muted); padding: 10px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .hook-regenerate:hover { border-color: var(--blue); color: var(--blue); }
+
+  .hook-nav { display: flex; gap: 12px; margin-top: 20px; align-items: center; }
+  .hook-nav-info { font-size: 13px; color: var(--muted); flex: 1; }
+  .hook-nav-info span { color: var(--orange); font-weight: 700; }
+
+  /* RESULT */
+  .result-card { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; animation: fadeUp 0.4s ease; }
+  .result-card.visible { display: block; }
+  .result-header { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .result-title { font-size: 16px; font-weight: 900; }
+  .result-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .result-actions { display: flex; gap: 8px; }
+  .btn-copy, .btn-new { padding: 9px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .btn-copy { background: var(--orange-glow); border: 1.5px solid var(--orange); color: var(--orange); }
+  .btn-copy:hover { background: var(--orange); color: white; }
+  .btn-new { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-new:hover { border-color: var(--orange); color: var(--orange); }
+
+  .chosen-hook-banner { background: rgba(255,107,0,0.08); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: flex-start; gap: 10px; }
+  .chosen-hook-label { font-size: 11px; font-weight: 700; color: var(--orange); margin-bottom: 4px; }
+  .chosen-hook-text { font-size: 13px; font-weight: 700; line-height: 1.5; }
+
+  .result-body { padding: 28px; }
+  .script-output { white-space: pre-wrap; line-height: 1.9; font-size: 15px; color: var(--text); font-family: 'Cairo', sans-serif; }
+
+  /* HISTORY */
+  .history-section { margin-top: 40px; }
+  .history-title { font-size: 16px; font-weight: 900; margin-bottom: 16px; }
+  .history-grid { display: flex; flex-direction: column; gap: 10px; }
+  .history-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .history-item:hover { border-color: var(--orange); }
+  .history-item-idea { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .history-item-arrow { color: var(--orange); font-size: 18px; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .header-topbar, .header-mainrow { padding: 10px 16px; }
+    .form-grid, .hook-grid { grid-template-columns: 1fr; }
+    main { padding: 28px 16px 60px; }
+    .pipeline { gap: 0; }
+    .pipe-arrow { margin: 0 4px; font-size: 14px; }
+  }
+
+</style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main>
+  <div class="hero">
+    <h1>مولّد السكريبت <span>الذكي</span></h1>
+    <p>Pipeline متعدد المراحل — هوك → سكريبت → نتيجة احترافية</p>
+  </div>
+
+  <!-- BRAIN STATUS -->
+  <div id="brainStatus" style="display:none;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:12px 20px;margin-bottom:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">🧠</span>
+      <div>
+        <div style="font-size:13px;font-weight:900;color:#a855f7">Style Brain نشط</div>
+        <div style="font-size:12px;color:var(--muted)" id="brainStatusText">جاري التحميل...</div>
+      </div>
+    </div>
+    <a href="/brain" style="font-size:12px;color:#a855f7;font-weight:700;text-decoration:none;border:1px solid rgba(168,85,247,0.3);padding:5px 12px;border-radius:8px">تعديل ←</a>
+  </div>
+
+  <!-- PIPELINE INDICATOR -->
+  <div class="pipeline" id="pipelineIndicator">
+    <div class="pipe-step active" id="pipe1">
+      <div class="pipe-num">1</div>
+      <div class="pipe-label">الأساسيات</div>
+    </div>
+    <div class="pipe-arrow" id="parrow1">→</div>
+    <div class="pipe-step" id="pipe2">
+      <div class="pipe-num">2</div>
+      <div class="pipe-label">التفاصيل</div>
+    </div>
+    <div class="pipe-arrow" id="parrow2">→</div>
+    <div class="pipe-step" id="pipe3">
+      <div class="pipe-num">⚡</div>
+      <div class="pipe-label">اختر الهوك</div>
+    </div>
+    <div class="pipe-arrow" id="parrow3">→</div>
+    <div class="pipe-step" id="pipe4">
+      <div class="pipe-num">✍️</div>
+      <div class="pipe-label">السكريبت</div>
+    </div>
+    <div class="pipe-arrow" id="parrow4">→</div>
+    <div class="pipe-step" id="pipe5">
+      <div class="pipe-num">🔍</div>
+      <div class="pipe-label">Critic</div>
+    </div>
+    <div class="pipe-arrow" id="parrow5">→</div>
+    <div class="pipe-step" id="pipe6">
+      <div class="pipe-num">✨</div>
+      <div class="pipe-label">Humanizer</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="form-card active" id="step1">
+    <div class="form-card-title">📋 الخطوة الأولى — الأساسيات</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>💡 الفكرة <span class="label-required">*</span></label>
+        <textarea id="idea" rows="3" maxlength="500" placeholder="مثال: ريلز يوضح كيف الهواتف تسمعنا وتطلعلنا إعلانات عن أشياء ذكرناها..."></textarea>
+        <div class="char-count"><span id="ideaCount">0</span>/500</div>
+      </div>
+      <div class="form-group full">
+        <label>🎯 نوع الفيديو <span class="label-required">*</span></label>
+        <div class="chips" id="videoTypeChips">
+          <button class="chip" data-val="ريلز انستغرام">📱 ريلز انستغرام<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="يوتيوب شورتس">▶️ يوتيوب شورتس<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="تيك توك">🎵 تيك توك<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="فيديو يوتيوب طويل">🎬 يوتيوب طويل<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="مقابلة">🎤 مقابلة<span class="ck"> ✓</span></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>⏱️ المدة <span class="label-required">*</span></label>
+        <select id="duration">
+          <option value="">اختر المدة</option>
+          <option value="15-30 ثانية">15–30 ثانية (ريلز قصير)</option>
+          <option value="30-60 ثانية">30–60 ثانية (ريلز عادي)</option>
+          <option value="1-3 دقائق">1–3 دقائق (شورتس / تيك توك)</option>
+          <option value="5-10 دقائق">5–10 دقائق (يوتيوب)</option>
+          <option value="10-20 دقيقة">10–20 دقيقة (يوتيوب طويل)</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>📍 الأماكن <span class="label-required">*</span></label>
+        <p class="field-hint">ممكن تختار أكثر من مكان</p>
+        <div class="chips" id="locationChips">
+          <button class="chip" data-val="جامعة">🎓 جامعة<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="كافيتيريا">☕ كافيتيريا<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="مكتب / ستوديو">💼 مكتب / ستوديو<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="شارع / خارجي">🏙️ شارع / خارجي<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="بيت">🏠 بيت<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="سيارة">🚗 سيارة<span class="ck"> ✓</span></button>
+          <button class="chip" data-val="أي مكان مناسب">📍 أي مكان<span class="ck"> ✓</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="form-nav">
+      <button class="btn-next" onclick="goStep2()">التالي ← التفاصيل</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="form-card" id="step2">
+    <div class="form-card-title">🎨 الخطوة الثانية — التفاصيل</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>⚡ نوع الـ Hook المفضل <span class="label-required">*</span></label>
+        <p class="field-hint">الذكاء الاصطناعي رح يولّد 5 hooks لتختار منها — بس حدد النوع اللي تفضله</p>
+        <div class="hook-grid">
+          <div class="hook-card" data-val="سؤال غريب يخلي المشاهد يفكر" onclick="toggleHook(this)">
+            <div class="hook-icon">❓</div>
+            <div><div class="hook-title">سؤال غريب</div><div class="hook-desc">يخلي المشاهد يوقف ويفكر من الثانية الأولى</div></div>
+          </div>
+          <div class="hook-card" data-val="صدمة أو معلومة غير متوقعة" onclick="toggleHook(this)">
+            <div class="hook-icon">💥</div>
+            <div><div class="hook-title">معلومة صادمة</div><div class="hook-desc">فاكت مفاجئ ما حدا توقعه</div></div>
+          </div>
+          <div class="hook-card" data-val="موقف يومي طبيعي يتحول فجأة" onclick="toggleHook(this)">
+            <div class="hook-icon">🎭</div>
+            <div><div class="hook-title">موقف يومي ينقلب</div><div class="hook-desc">مشهد بسيط يتحول لشي مفاجئ</div></div>
+          </div>
+          <div class="hook-card" data-val="POV مفاجئ من زاوية غير عادية" onclick="toggleHook(this)">
+            <div class="hook-icon">👁️</div>
+            <div><div class="hook-title">POV مفاجئ</div><div class="hook-desc">زاوية نظر غير متوقعة</div></div>
+          </div>
+          <div class="hook-card" data-val="تحدي أو رهان بين شخصين" onclick="toggleHook(this)">
+            <div class="hook-icon">🤜</div>
+            <div><div class="hook-title">تحدي / رهان</div><div class="hook-desc">توتر وتشويق من البداية</div></div>
+          </div>
+          <div class="hook-card" data-val="وعد بمعلومة مهمة في النهاية" onclick="toggleHook(this)">
+            <div class="hook-icon">🎯</div>
+            <div><div class="hook-title">وعد بنهاية مفاجئة</div><div class="hook-desc">يخليهم يكملوا للآخر</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>🎭 الأسلوب العام</label>
+        <div class="chips" id="styleChips">
+          <button class="chip selected" data-val="تعليمي ومبسط">تعليمي ومبسط</button>
+          <button class="chip" data-val="ترفيهي وخفيف">ترفيهي وخفيف</button>
+          <button class="chip" data-val="إخباري وجاد">إخباري وجاد</button>
+          <button class="chip" data-val="قصة درامية">قصة درامية</button>
+          <button class="chip" data-val="تحدي وتفاعلي">تحدي وتفاعلي</button>
+          <button class="chip" data-val="وراء الكواليس">وراء الكواليس</button>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>👥 الكاست <span class="label-opt">(اختياري)</span></label>
+        <div id="castList">
+          <div class="cast-row">
+            <input type="text" placeholder="مثال: عبدالعزيز — المقدم الرئيسي" class="cast-input">
+            <button class="btn-add-cast" onclick="addCast()">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>📝 ملاحظات <span class="label-opt">(اختياري)</span></label>
+        <textarea id="notes" rows="2" maxlength="300" placeholder="مثال: لازم يحتوي على سؤال للجمهور، أو يرتبط بإعلان..."></textarea>
+      </div>
+    </div>
+    <div class="form-nav">
+      <button class="btn-back" onclick="goStep1()">← رجوع</button>
+      <button class="btn-next" id="generateHooksBtn" onclick="generateHooks()">⚡ ولّد الـ Hooks</button>
+    </div>
+  </div>
+
+  <!-- LOADING HOOKS -->
+  <div class="loading" id="loadingHooks">
+    <div class="spinner"></div>
+    <div class="loading-title">جاري توليد الـ Hooks...</div>
+    <div class="loading-sub">بنحلل فكرتك ونكتبلك <span>5 hooks</span> مختلفة</div>
+  </div>
+
+  <!-- HOOK SELECTION (المرحلة الأولى الجديدة) -->
+  <div class="hook-select-section" id="hookSelectSection">
+    <div class="hook-select-header">
+      <div class="hook-select-badge">⚡ المرحلة 1 من 2 — اختر الهوك</div>
+      <div class="hook-select-title">اختر الـ Hook اللي يعجبك</div>
+      <div class="hook-select-sub">الذكاء الاصطناعي كتب 5 hooks مختلفة لفكرتك — اختر واحد وبنكتب السكريبت كامل بناءً عليه</div>
+    </div>
+    <div class="hook-options" id="hookOptions">
+      <!-- Generated dynamically -->
+    </div>
+    <div class="hook-nav">
+      <button class="hook-regenerate" onclick="generateHooks()">🔄 ولّد hooks جديدة</button>
+      <div class="hook-nav-info" id="hookNavInfo">اختر hook واحد على الأقل</div>
+      <button class="btn-back" onclick="goStep2()">← تعديل</button>
+      <button class="btn-next" id="buildScriptBtn" onclick="buildScript()" disabled>✍️ اكتب السكريبت</button>
+    </div>
+  </div>
+
+  <!-- LOADING SCRIPT -->
+  <div class="loading" id="loadingScript">
+    <div class="spinner"></div>
+    <div class="loading-title">جاري كتابة السكريبت...</div>
+    <div class="loading-sub">بنبني السكريبت بناءً على الـ hook اللي اخترته بأسلوب <span>تك عربي</span></div>
+  </div>
+
+  <!-- LOADING CRITIC -->
+  <div class="loading" id="loadingCritic">
+    <div class="spinner" style="border-top-color:#3b82f6"></div>
+    <div class="loading-title">🔍 Critic Agent شغّال...</div>
+    <div class="loading-sub">بيفحص السكريبت ويحدد <span>الأجزاء الضعيفة</span></div>
+  </div>
+
+  <!-- LOADING HUMANIZER -->
+  <div class="loading" id="loadingHumanizer">
+    <div class="spinner" style="border-top-color:#22c55e"></div>
+    <div class="loading-title">✨ Humanizer شغّال...</div>
+    <div class="loading-sub">بيحول النص لـ<span>شامية طبيعية 100%</span> وبشيل الـ AI cringe</div>
+  </div>
+
+  <!-- CRITIC FEEDBACK PANEL -->
+  <div id="criticPanel" style="display:none;background:#111;border:1.5px solid #3b82f6;border-radius:16px;padding:20px 24px;margin-bottom:20px;animation:fadeUp 0.3s ease">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:20px">🔍</span>
+      <div>
+        <div style="font-size:14px;font-weight:900;color:#3b82f6">Critic Agent — تقرير</div>
+        <div style="font-size:12px;color:var(--muted)">هاي الملاحظات أُخذت بعين الاعتبار بالـ Humanizer</div>
+      </div>
+    </div>
+    <div id="criticOutput" style="font-size:13px;color:#ccc;line-height:1.8;white-space:pre-wrap"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div>
+        <div class="result-title">🎬 السكريبت الكامل</div>
+        <div class="result-meta" id="resultMeta"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-copy" onclick="copyScript()">📋 نسخ السكريبت</button>
+        <button class="btn-new" onclick="resetAll()">✏️ فكرة جديدة</button>
+      </div>
+    </div>
+    <div class="chosen-hook-banner" id="chosenHookBanner">
+      <div>
+        <div class="chosen-hook-label">⚡ الـ Hook المختار</div>
+        <div class="chosen-hook-text" id="chosenHookDisplay"></div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="script-output" id="scriptOutput"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-title">🕐 السكريبتات السابقة</div>
+    <div class="history-grid" id="historyGrid"></div>
+  </div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG — ضع مفتاحك هون
+// ═══════════════════════════════════════════
+const DEEPSEEK_KEY = 'sk-685e199ee923499a900f0bd9c2fa8741';
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let selectedStyle     = 'تعليمي ومبسط';
+let selectedVideoType = '';
+let selectedLocations = [];
+let selectedHooks     = [];   // hook types من step 2
+let selectedHookText  = '';   // النص الكامل للهوك اللي اختاره المستخدم
+let scriptHistory     = JSON.parse(localStorage.getItem('scriptHistory') || '[]');
+
+// ═══════════════════════════════════════════
+//  PIPELINE STEPS UI
+// ═══════════════════════════════════════════
+function setPipelineStep(n) {
+  [1,2,3,4,5,6].forEach(i => {
+    const el = document.getElementById(`pipe${i}`);
+    const arrow = document.getElementById(`parrow${i}`);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (i < n) { el.classList.add('done'); if(arrow) arrow.classList.add('done'); }
+    else if (i === n) { el.classList.add('active'); if(arrow) arrow.classList.remove('done'); }
+    else { if(arrow) arrow.classList.remove('done'); }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  CHIP / HOOK TOGGLE
+// ═══════════════════════════════════════════
+document.querySelectorAll('#videoTypeChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#videoTypeChips .chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedVideoType = chip.dataset.val;
+  });
+});
+document.querySelectorAll('#styleChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#styleChips .chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedStyle = chip.dataset.val;
+  });
+});
+document.querySelectorAll('#locationChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    chip.classList.toggle('selected');
+    const val = chip.dataset.val;
+    selectedLocations = chip.classList.contains('selected')
+      ? [...selectedLocations, val]
+      : selectedLocations.filter(v => v !== val);
+  });
+});
+function toggleHook(card) {
+  card.classList.toggle('selected');
+  const val = card.dataset.val;
+  selectedHooks = card.classList.contains('selected')
+    ? [...selectedHooks, val]
+    : selectedHooks.filter(v => v !== val);
+}
+function addCast() {
+  const row = document.createElement('div');
+  row.className = 'cast-row';
+  row.innerHTML = `<input type="text" placeholder="اسم الشخص ودوره" class="cast-input"><button class="btn-rm-cast" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('castList').appendChild(row);
+}
+document.getElementById('idea').addEventListener('input', function() {
+  document.getElementById('ideaCount').textContent = this.value.length;
+});
+
+// ═══════════════════════════════════════════
+//  STEP NAV
+// ═══════════════════════════════════════════
+function hideAll() {
+  ['step1','step2','loadingHooks','hookSelectSection','loadingScript','loadingCritic','loadingHumanizer','resultCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('active','visible'); }
+  });
+}
+
+function goStep1() {
+  hideAll();
+  document.getElementById('step1').classList.add('active');
+  setPipelineStep(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goStep2() {
+  if (!document.getElementById('idea').value.trim()) { showToast('⚠️','اكتب الفكرة أول!'); return; }
+  if (!selectedVideoType) { showToast('⚠️','اختر نوع الفيديو!'); return; }
+  if (!document.getElementById('duration').value) { showToast('⚠️','اختر المدة!'); return; }
+  if (!selectedLocations.length) { showToast('⚠️','اختر مكان واحد على الأقل!'); return; }
+
+  // لو في هوك جاهز من مولد الأفكار — تخطى step2 وولّد السكريبت مباشرة
+  if (selectedHookText) {
+    buildScript();
+    return;
+  }
+
+  hideAll();
+  document.getElementById('step2').classList.add('active');
+  setPipelineStep(2);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+//  BRAIN INTEGRATION — يقرأ من localStorage
+// ═══════════════════════════════════════════
+function loadBrainContext() {
+  const rules   = JSON.parse(localStorage.getItem('ta_brain_rules')   || '[]');
+  const scripts = JSON.parse(localStorage.getItem('ta_brain_scripts') || '[]');
+
+  // Show brain status bar
+  const bar = document.getElementById('brainStatus');
+  if (rules.length || scripts.length) {
+    bar.style.display = 'flex';
+    const pinnedRules  = rules.filter(r => r.pinned);
+    const starredScripts = scripts.filter(s => s.starred);
+    document.getElementById('brainStatusText').textContent =
+      `${rules.length} قاعدة (${pinnedRules.length} مثبتة) · ${scripts.length} سكريبت (${starredScripts.length} نجوم)`;
+  }
+
+  // Build rules block for prompts
+  const pinnedText = rules.filter(r => r.pinned).map(r =>
+    `- ${r.text}${r.example ? ` (مثال: ${r.example})` : ''}`
+  ).join('\n');
+  const allRulesText = rules.map(r =>
+    `- [${r.category}] ${r.text}${r.example ? ` ← ${r.example}` : ''}`
+  ).join('\n');
+
+  // Build few-shot examples block
+  const starredExamples = scripts.filter(s => s.starred).slice(0, 3).map((s, i) =>
+    `--- مثال ${i+1} ---\nالفكرة: ${s.idea}\nالهوك: ${s.hook || 'غير محدد'}\nالسكريبت:\n${s.script}\n${s.notes ? `ملاحظات: ${s.notes}` : ''}`
+  ).join('\n\n');
+
+  return { pinnedText, allRulesText, starredExamples, hasData: !!(rules.length || scripts.length) };
+}
+
+// ═══════════════════════════════════════════
+//  PHASE 1 — HOOK GENERATOR
+// ═══════════════════════════════════════════
+async function generateHooks() {
+  if (!selectedHooks.length) { showToast('⚠️','اختر نوع الـ Hook المفضل أول!'); return; }
+
+  const idea     = document.getElementById('idea').value.trim();
+  const duration = document.getElementById('duration').value;
+  const notes    = document.getElementById('notes').value.trim();
+  const cast     = [...document.querySelectorAll('.cast-input')].map(i => i.value.trim()).filter(Boolean);
+  const brain    = loadBrainContext();
+
+  hideAll();
+  document.getElementById('loadingHooks').classList.add('visible');
+  setPipelineStep(3);
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+
+  const hookPrompt = `أنت خبير محتوى لقناة "تك عربي" — قناة تقنية شبابية عربية.
+
+المطلوب: اكتب بالضبط 5 hooks مختلفة لفيديو تقني بالشامية الطبيعية جداً.
+
+تفاصيل الفيديو:
+- الفكرة: ${idea}
+- النوع: ${selectedVideoType}
+- المدة: ${duration}
+- الأسلوب: ${selectedStyle}
+${cast.length ? `- الكاست: ${cast.join('، ')}` : ''}
+${notes ? `- ملاحظات: ${notes}` : ''}
+
+أنواع الـ Hooks المطلوبة (ضمن هاي الأنواع): ${selectedHooks.join('، ')}
+
+${brain.pinnedText ? `قواعد مثبتة من Style Brain (الزامية):\n${brain.pinnedText}\n` : ''}
+
+قواعد الـ Hook:
+1. جملة وحدة أو اثنتين MAX — مش أكثر
+2. شامية طبيعية — كأنك شاب بيحكي لصاحبه
+3. أول 3 ثواني لازم تخلي الواحد يوقف الـ scroll
+4. ممنوع تبدأ بـ "هل تعلم" أو "في هذا الفيديو"
+5. لازم يكون متعلق بالفكرة مباشرة
+
+${brain.starredExamples ? `أمثلة من سكريبتات القناة الناجحة — قلّد هاد الأسلوب:\n${brain.starredExamples}\n` : ''}
+
+الرد يكون JSON فقط — بدون أي نص خارجه:
+{
+  "hooks": [
+    {
+      "type": "نوع الهوك",
+      "text": "نص الهوك",
+      "why": "ليش هاد الهوك رح يشتغل"
+    }
+  ]
+}`;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: hookPrompt }],
+        temperature: 0.9,
+        max_tokens: 1500
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    let raw = data.choices[0].message.content.trim();
+    raw = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(raw);
+    renderHookOptions(parsed.hooks);
+
+  } catch(e) {
+    hideAll();
+    document.getElementById('step2').classList.add('active');
+    setPipelineStep(2);
+    showToast('❌', 'خطأ في توليد الـ Hooks: ' + e.message);
+  }
+}
+
+function renderHookOptions(hooks) {
+  hideAll();
+  const container = document.getElementById('hookOptions');
+  container.innerHTML = hooks.map((h, i) => `
+    <div class="hook-option" id="hookopt-${i}" onclick="selectHookOption(${i}, this)" data-text="${escapeAttr(h.text)}">
+      <div class="hook-option-type">${h.type}</div>
+      <div class="hook-option-text">${h.text}</div>
+      <div class="hook-option-why">💡 ${h.why}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('hookSelectSection').classList.add('visible');
+  document.getElementById('buildScriptBtn').disabled = true;
+  document.getElementById('hookNavInfo').textContent = 'اختر hook واحد على الأقل';
+  setPipelineStep(3);
+  document.getElementById('hookSelectSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function escapeAttr(str) {
+  return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let currentSelectedHookIndex = -1;
+
+function selectHookOption(i, el) {
+  document.querySelectorAll('.hook-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  currentSelectedHookIndex = i;
+  selectedHookText = el.dataset.text;
+  document.getElementById('buildScriptBtn').disabled = false;
+  document.getElementById('hookNavInfo').innerHTML = `<span>✓ تم اختيار هوك</span> — اضغط "اكتب السكريبت" لما تجهز`;
+}
+
+// ═══════════════════════════════════════════
+//  PHASE 2 — SCRIPT WRITER
+// ═══════════════════════════════════════════
+async function buildScript() {
+  if (!selectedHookText) { showToast('⚠️','اختر hook أول!'); return; }
+
+  const idea     = document.getElementById('idea').value.trim();
+  const duration = document.getElementById('duration').value;
+  const notes    = document.getElementById('notes').value.trim();
+  const cast     = [...document.querySelectorAll('.cast-input')].map(i => i.value.trim()).filter(Boolean);
+  const brain    = loadBrainContext();
+
+  hideAll();
+  document.getElementById('loadingScript').classList.add('visible');
+  setPipelineStep(4);
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+
+  const scriptPrompt = `أنت كاتب سكريبتات محترف لقناة "تك عربي" — قناة تقنية شبابية عربية بالشامية.
+
+🎯 مهمتك: اكتب سكريبت كامل يبدأ بالـ Hook التالي تحديداً:
+
+"${selectedHookText}"
+
+تفاصيل الفيديو:
+- الفكرة: ${idea}
+- النوع: ${selectedVideoType}
+- المدة: ${duration}
+- الأسلوب: ${selectedStyle}
+- الأماكن: ${selectedLocations.join('، ')}
+- الكاست: ${cast.length ? cast.join('، ') : 'حر حسب الفكرة'}
+${notes ? `- ملاحظات: ${notes}` : ''}
+
+${brain.allRulesText ? `قواعد Style Brain — لازم تلتزم فيها كلها:\n${brain.allRulesText}\n` : ''}
+
+${brain.starredExamples ? `أمثلة من سكريبتات القناة الناجحة — قلّد هاد الأسلوب حرفياً:\n${brain.starredExamples}\n` : ''}
+
+قواعد الكتابة:
+1. ابدأ بالـ Hook المذكور حرفياً
+2. كل مشهد 1-3 ثواني
+3. جمل قصيرة وعفوية — مش رسمية
+4. اللهجة شامية طبيعية 100%
+5. نهاية ذكية أو Loop يخلي الواحد يعيد الفيديو
+6. ممنوع الحشو أو التكرار
+
+شكل السكريبت:
+🎬 شوت 1 — [اسم اللقطة] (X ثواني):
+وصف: [الزاوية والمكان والحركة]
+💬 الحوار: "..."
+
+(كرر لكل شوت — نوّع: Close-up، Wide، POV، شاشة موبايل)
+
+🔁 النهاية:
+[كيف ينتهي]
+
+📌 ملاحظات تصويرية:
+[نصائح الأداء والتصوير]`;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: scriptPrompt }],
+        temperature: 0.8,
+        max_tokens: 3000
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const rawScript = data.choices[0].message.content;
+    // Chain to Critic
+    await runCritic(rawScript, idea, brain);
+
+  } catch(e) {
+    hideAll();
+    document.getElementById('hookSelectSection').classList.add('visible');
+    setPipelineStep(3);
+    showToast('❌', 'خطأ في كتابة السكريبت: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  PHASE 3 — CRITIC AGENT
+// ═══════════════════════════════════════════
+async function runCritic(rawScript, idea, brain) {
+  hideAll();
+  document.getElementById('loadingCritic').classList.add('visible');
+  setPipelineStep(5);
+
+  const criticPrompt = `أنت Critic Agent متخصص بمحتوى قنوات تك عربي الشبابية.
+
+راجع هاد السكريبت وانتقده بشكل مختصر وعملي:
+
+--- السكريبت ---
+${rawScript}
+--- نهاية السكريبت ---
+
+السياق: فيديو عن "${idea}" على ${selectedVideoType}، مدة ${document.getElementById('duration').value}
+
+${brain.pinnedText ? `القواعد الإلزامية:\n${brain.pinnedText}\n` : ''}
+
+المطلوب منك:
+1. حدد 2-3 أجزاء ضعيفة بالضبط (جملة أو مشهد محدد) مع سبب الضعف
+2. حدد إذا في مشاهد مصطنعة أو AI cringe
+3. حدد إذا اللهجة مش شامية طبيعية في أي جزء
+4. قيّم الهوك والنهاية
+
+كون مختصر وعملي — نقاط قصيرة فقط، بدون تعقيد.`;
+
+  let criticFeedback = '';
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: criticPrompt }],
+        temperature: 0.5,
+        max_tokens: 800
+      })
+    });
+    const data = await res.json();
+    if (!data.error) criticFeedback = data.choices[0].message.content;
+  } catch(e) {
+    criticFeedback = 'تعذّر تشغيل الـ Critic — جاري المتابعة بالـ Humanizer...';
+  }
+
+  // Chain to Humanizer
+  await runHumanizer(rawScript, criticFeedback, brain);
+}
+
+// ═══════════════════════════════════════════
+//  PHASE 4 — HUMANIZER
+// ═══════════════════════════════════════════
+async function runHumanizer(rawScript, criticFeedback, brain) {
+  hideAll();
+  document.getElementById('loadingHumanizer').classList.add('visible');
+  setPipelineStep(6);
+
+  const humanizerPrompt = `أنت Humanizer متخصص بتحويل سكريبتات الـ AI لنص بشري طبيعي لقناة "تك عربي".
+
+هاد السكريبت كتبه AI وبحاجة لـ humanize:
+--- السكريبت ---
+${rawScript}
+--- نهاية السكريبت ---
+
+${criticFeedback ? `الـ Critic حدد هاي المشاكل — عالجها:\n${criticFeedback}\n` : ''}
+
+${brain.allRulesText ? `قواعد القناة الإلزامية:\n${brain.allRulesText}\n` : ''}
+
+${brain.starredExamples ? `أسلوب القناة الناجح — حاكيه:\n${brain.starredExamples}\n` : ''}
+
+مهمتك:
+1. حوّل كل الجمل الرسمية لشامية طبيعية عفوية — كأن شاب بيحكي لصاحبه
+2. احذف أي مشهد مصطنع (كتابة على لوح، شرح بإيماءات مبالغ فيها، مشاهد تمثيلية واضحة)
+3. قصّر الجمل الطويلة
+4. إذا الهوك ضعيف، حسّنه — بس حافظ على المعنى
+5. إذا النهاية ضعيفة، اعملها Loop أو سؤال ذكي
+6. حافظ على نفس الشكل (🎬 شوت، 💬 الحوار، إلخ)
+
+أعطِ السكريبت المحسّن فقط — بدون تعليق أو شرح.`;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: humanizerPrompt }],
+        temperature: 0.75,
+        max_tokens: 3000
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const finalScript = data.choices[0].message.content;
+
+    // Show critic panel
+    if (criticFeedback) {
+      const cp = document.getElementById('criticPanel');
+      cp.style.display = 'block';
+      document.getElementById('criticOutput').textContent = criticFeedback;
+    }
+
+    document.getElementById('scriptOutput').innerHTML = formatScript(finalScript);
+    document.getElementById('chosenHookDisplay').textContent = selectedHookText;
+    document.getElementById('resultMeta').textContent = `${selectedVideoType} · ${document.getElementById('duration').value} · ${selectedStyle} · ✨ Humanized`;
+    hideAll();
+    document.getElementById('resultCard').classList.add('visible');
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    saveHistory(document.getElementById('idea').value.trim(), selectedVideoType, document.getElementById('duration').value, selectedHookText, finalScript);
+
+  } catch(e) {
+    hideAll();
+    document.getElementById('hookSelectSection').classList.add('visible');
+    setPipelineStep(3);
+    showToast('❌', 'خطأ في الـ Humanizer: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  FORMAT / COPY / RESET
+// ═══════════════════════════════════════════
+function formatScript(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(🎬[^\n]+)/g,'<strong style="color:var(--orange);font-size:16px">$1</strong>')
+    .replace(/(📌[^\n]+)/g,'<strong style="color:var(--muted)">$1</strong>')
+    .replace(/(💬[^\n]+)/g,'<em style="color:#ddd">$1</em>')
+    .replace(/(🔁[^\n]+)/g,'<strong style="color:var(--green)">$1</strong>')
+    .replace(/\n/g,'<br>');
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(document.getElementById('scriptOutput').innerText).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = '✅ تم النسخ!';
+    setTimeout(() => btn.textContent = '📋 نسخ السكريبت', 2000);
+  });
+}
+
+function resetAll() {
+  hideAll();
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('idea').value = '';
+  document.getElementById('ideaCount').textContent = '0';
+  document.getElementById('duration').value = '';
+  document.getElementById('notes').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.querySelector('#styleChips .chip').classList.add('selected');
+  document.querySelectorAll('.hook-card').forEach(c => c.classList.remove('selected'));
+  selectedVideoType = ''; selectedLocations = []; selectedHooks = [];
+  selectedHookText = ''; currentSelectedHookIndex = -1;
+  document.getElementById('castList').innerHTML = `<div class="cast-row"><input type="text" placeholder="مثال: عبدالعزيز — المقدم الرئيسي" class="cast-input"><button class="btn-add-cast" onclick="addCast()">+</button></div>`;
+  setPipelineStep(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════
+function saveHistory(idea, videoType, duration, hook, script) {
+  scriptHistory.unshift({ idea, videoType, duration, hook, script, date: new Date().toLocaleDateString('ar') });
+  if (scriptHistory.length > 10) scriptHistory.pop();
+  localStorage.setItem('scriptHistory', JSON.stringify(scriptHistory));
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!scriptHistory.length) return;
+  document.getElementById('historySection').style.display = 'block';
+  document.getElementById('historyGrid').innerHTML = scriptHistory.map((item, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <div style="overflow:hidden">
+        <div class="history-item-idea">${item.idea}</div>
+        <div class="history-item-meta">${item.videoType} · ${item.duration} · ${item.date}</div>
+        ${item.hook ? `<div style="font-size:11px;color:var(--orange);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">⚡ ${item.hook}</div>` : ''}
+      </div>
+      <div class="history-item-arrow">←</div>
+    </div>`).join('');
+}
+
+function loadHistory(i) {
+  const item = scriptHistory[i];
+  document.getElementById('scriptOutput').innerHTML = formatScript(item.script);
+  if (item.hook) document.getElementById('chosenHookDisplay').textContent = item.hook;
+  document.getElementById('resultMeta').textContent = `${item.videoType} · ${item.duration}`;
+  hideAll();
+  document.getElementById('resultCard').classList.add('visible');
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(icon, msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 3500);
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+loadBrainContext();
+renderHistory();
+
+// قراءة الفكرة القادمة من مولّد الأفكار
+const pendingIdea = localStorage.getItem('ta_pending_idea');
+if (pendingIdea) {
+  try {
+    const data = JSON.parse(pendingIdea);
+    localStorage.removeItem('ta_pending_idea');
+
+    // 1. حط الفكرة في الحقل
+    if (data.idea) {
+      const ideaField = document.getElementById('idea');
+      ideaField.value = data.idea;
+      document.getElementById('ideaCount').textContent = data.idea.length;
+    }
+
+    // 2. اختار المنصة الصح من الـ chips
+    if (data.platform) {
+      const platformMap = {
+        'انستغرام ريلز': 'ريلز انستغرام',
+        'تيك توك': 'تيك توك',
+        'يوتيوب شورتس': 'يوتيوب شورتس',
+        'يوتيوب طويل': 'فيديو يوتيوب طويل'
+      };
+      const mappedPlatform = platformMap[data.platform] || data.platform;
+      document.querySelectorAll('#videoTypeChips .chip').forEach(chip => {
+        if (chip.dataset.val === mappedPlatform) chip.click();
+      });
+    }
+
+    // 3. الهوك — احفظه في المتغير الرئيسي وعرضه بشكل واضح
+    if (data.hook) {
+      selectedHookText = data.hook;
+
+      // عرض الهوك كبانر واضح داخل step1
+      const hookPreview = document.createElement('div');
+      hookPreview.id = 'hookFromIdeas';
+      hookPreview.style.cssText = 'background:rgba(255,107,0,0.08);border:1.5px solid var(--orange);border-radius:14px;padding:16px 20px;margin-top:20px;';
+      hookPreview.innerHTML = '<div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:6px">⚡ الهوك القادم من مولّد الأفكار</div>' +
+        '<div style="font-size:14px;color:var(--text);line-height:1.7">"' + data.hook + '"</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:8px">✅ سيُستخدم هاد الهوك تلقائياً — ما بتحتاج تختار هوك من جديد</div>';
+      document.getElementById('step1').appendChild(hookPreview);
+    }
+
+    showToast('💡', 'تم تحميل الفكرة والهوك!');
+  } catch(e) {
+    console.error('Error loading pending idea:', e);
+  }
+}
+</script>
+</body>
+</html>

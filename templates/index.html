@@ -41,25 +41,7 @@
     pointer-events: none;
     z-index: 0;
   }
-  header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 40px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(10,10,10,0.85);
-    backdrop-filter: blur(12px);
-  }
-  .logo-area { display: flex; align-items: center; gap: 14px; }
-  .logo-area img { height: 38px; }
-  .logo-area span {
-    font-size: 13px; color: var(--muted);
-    border-right: 2px solid var(--orange);
-    padding-right: 14px; font-weight: 600;
-  }
-  .header-badge {
+.header-badge {
     background: var(--orange-glow);
     border: 1px solid var(--orange);
     color: var(--orange);
@@ -298,29 +280,143 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* ── REVIEW SECTION ── */
+  #reviewSection { display:none; margin-top:32px; }
+  #reviewSection.visible { display:block; }
+  .review-header {
+    background: var(--card); border: 1px solid var(--orange);
+    border-radius: 16px; padding: 20px 28px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .review-header-left h2 { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+  .review-header-left p { font-size: 13px; color: var(--muted); }
+  .review-select-info {
+    background: var(--orange-glow); border: 1px solid var(--orange);
+    color: var(--orange); padding: 6px 18px; border-radius: 20px;
+    font-size: 14px; font-weight: 700;
+  }
+  .review-toolbar {
+    display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
+  }
+  .btn-select-all, .btn-deselect-all {
+    padding: 9px 20px; border-radius: 10px;
+    font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; border: 1.5px solid var(--border);
+  }
+  .btn-select-all { background: var(--orange); color: white; border-color: var(--orange); }
+  .btn-select-all:hover { background: var(--orange-light); }
+  .btn-deselect-all { background: transparent; color: var(--muted); }
+  .btn-deselect-all:hover { border-color: var(--red); color: var(--red); }
+  .review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .review-img-card {
+    border-radius: 12px; overflow: hidden;
+    border: 2px solid var(--green); cursor: pointer;
+    transition: all 0.2s; position: relative;
+    background: var(--card);
+  }
+  .review-img-card.deselected { border-color: var(--border); opacity: 0.45; }
+  .review-img-card:hover { transform: translateY(-2px); }
+  .review-img-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+  .review-check {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 900;
+    background: var(--green); color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: all 0.2s;
+  }
+  .review-img-card.deselected .review-check { background: #333; color: var(--muted); }
+  .review-img-name {
+    padding: 7px 10px; font-size: 11px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: #111;
+  }
+  .approve-bar {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 28px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .approve-bar label { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .approve-bar input {
+    flex: 1; min-width: 200px; background: #111;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 11px 16px; font-family: 'Cairo', sans-serif;
+    font-size: 14px; color: var(--text); outline: none;
+  }
+  .approve-bar input:focus { border-color: var(--orange); }
+  .btn-approve {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: white; border: none; padding: 12px 28px;
+    border-radius: 12px; font-family: 'Cairo', sans-serif;
+    font-size: 15px; font-weight: 900; cursor: pointer;
+    transition: all 0.25s; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+  }
+  .btn-approve:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
+  .btn-approve:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .approve-success {
+    display: none; background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3); color: var(--green);
+    border-radius: 12px; padding: 16px 22px;
+    font-size: 14px; font-weight: 700; margin-top: 14px;
+  }
+  .approve-success.visible { display: block; }
+
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--black); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    position: relative; z-index: 10;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-social { display: flex; align-items: center; gap: 18px; }
+  .footer-social a {
+    color: #aaa;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex; align-items: center;
+  }
+  .footer-social a:hover { color: #fff; }
+  .footer-social svg { width: 18px; height: 18px; fill: currentColor; }
+  .footer-links { display: flex; align-items: center; gap: 28px; }
+  .footer-links a {
+    color: #aaa; font-size: 13px; font-weight: 600;
+    text-decoration: none; transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--orange); }
+  @media (max-width: 600px) {
+    .site-footer { padding: 14px 16px; }
+    .footer-links a { font-size: 12px; }
+  }
   ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
 
   @media (max-width: 600px) {
-    header { padding: 14px 20px; }
-    main { padding: 28px 16px 60px; }
+main { padding: 28px 16px 60px; }
     .stats-grid { gap: 8px; }
     .stat-number { font-size: 26px; }
     .upload-zone { padding: 40px 20px; }
   }
+
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-area">
-    <img src="/static/logo.png" alt="تك عربي" onerror="this.style.display='none'">
-    <span>معالج الصور</span>
-  </div>
-  <div class="header-badge">⚡ تك عربي</div>
-</header>
+{% include '_header.html' %}
 
 <main>
   <div class="hero">
@@ -361,6 +457,31 @@
     <div class="progress-counter" id="progressCounter" style="display:none">
       تمت معالجة <span id="doneCount">0</span> من <span id="totalCount">0</span> صورة
     </div>
+  </div>
+
+  <!-- ── REVIEW SECTION ── -->
+  <div id="reviewSection">
+    <div class="review-header">
+      <div class="review-header-left">
+        <h2>🖼️ راجع الصور قبل الحفظ</h2>
+        <p>كل الصور محددة — اضغط على اللي ما بدك إياها لإلغاء تحديدها</p>
+      </div>
+      <div class="review-select-info" id="reviewSelectInfo">0 / 0 محددة</div>
+    </div>
+
+    <div class="review-toolbar">
+      <button class="btn-select-all" onclick="selectAllReview()">✅ تحديد الكل</button>
+      <button class="btn-deselect-all" onclick="deselectAllReview()">🗑️ إلغاء الكل</button>
+    </div>
+
+    <div class="review-grid" id="reviewGrid"></div>
+
+    <div class="approve-bar">
+      <label>📁 اسم الأيفنت:</label>
+      <input type="text" id="eventNameInput" placeholder="مثال: Tech3arabi_May2025" dir="ltr">
+      <button class="btn-approve" id="btnApprove" onclick="approveSelected()">💾 حفظ المحددة</button>
+    </div>
+    <div class="approve-success" id="approveSuccess"></div>
   </div>
 
   <div class="stats-grid" id="statsGrid" style="display:none">
@@ -520,19 +641,133 @@ function setBar(pct, text) {
   document.getElementById('progressText').textContent = text;
 }
 
+// ── REVIEW STATE ──────────────────────────────────────────────────────────
+let reviewFiles    = [];   // { name, selected }
+let reviewJobStats = null;
+let reviewJobResults = null;
+
 function renderResults(job) {
-  document.getElementById('statFinal').textContent    = job.stats.final;
-  document.getElementById('statRejected').textContent = job.stats.rejected;
-  document.getElementById('statDups').textContent     = job.stats.duplicates;
+  // Save stats/rejected/dups for later display
+  reviewJobStats   = job.stats;
+  reviewJobResults = job.results;
+
+  // Show REVIEW section (not final results yet)
+  reviewFiles = (job.results.final || []).map(name => ({ name, selected: true }));
+  buildReviewGrid();
+  document.getElementById('reviewSection').classList.add('visible');
+  document.getElementById('reviewSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildReviewGrid() {
+  const grid = document.getElementById('reviewGrid');
+  if (!reviewFiles.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span>📭</span>لا توجد صور جاهزة بعد الفلترة</div>`;
+    updateReviewInfo();
+    return;
+  }
+  grid.innerHTML = reviewFiles.map((f, i) => `
+    <div class="review-img-card ${f.selected ? '' : 'deselected'}" id="rcard-${i}" onclick="toggleReview(${i})">
+      <img src="/preview/${currentSession}/FINAL/${encodeURIComponent(f.name)}" loading="lazy" alt="${f.name}"
+           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23333%22/></svg>'">
+      <div class="review-check" id="rcheck-${i}">${f.selected ? '✓' : '○'}</div>
+      <div class="review-img-name">${f.name}</div>
+    </div>
+  `).join('');
+  updateReviewInfo();
+}
+
+function toggleReview(i) {
+  reviewFiles[i].selected = !reviewFiles[i].selected;
+  const card  = document.getElementById(`rcard-${i}`);
+  const check = document.getElementById(`rcheck-${i}`);
+  if (reviewFiles[i].selected) {
+    card.classList.remove('deselected');
+    check.textContent = '✓';
+  } else {
+    card.classList.add('deselected');
+    check.textContent = '○';
+  }
+  updateReviewInfo();
+}
+
+function selectAllReview() {
+  reviewFiles.forEach((f, i) => {
+    f.selected = true;
+    document.getElementById(`rcard-${i}`)?.classList.remove('deselected');
+    const ch = document.getElementById(`rcheck-${i}`);
+    if (ch) ch.textContent = '✓';
+  });
+  updateReviewInfo();
+}
+
+function deselectAllReview() {
+  reviewFiles.forEach((f, i) => {
+    f.selected = false;
+    document.getElementById(`rcard-${i}`)?.classList.add('deselected');
+    const ch = document.getElementById(`rcheck-${i}`);
+    if (ch) ch.textContent = '○';
+  });
+  updateReviewInfo();
+}
+
+function updateReviewInfo() {
+  const sel = reviewFiles.filter(f => f.selected).length;
+  document.getElementById('reviewSelectInfo').textContent = `${sel} / ${reviewFiles.length} محددة`;
+}
+
+async function approveSelected() {
+  const selected   = reviewFiles.filter(f => f.selected).map(f => f.name);
+  const eventName  = document.getElementById('eventNameInput').value.trim();
+
+  if (!selected.length) { showToast('❌', 'ما في صور محددة!'); return; }
+  if (!eventName)        { showToast('⚠️', 'حط اسم الأيفنت أول'); document.getElementById('eventNameInput').focus(); return; }
+
+  const btn = document.getElementById('btnApprove');
+  btn.disabled    = true;
+  btn.textContent = '⏳ جاري الحفظ...';
+
+  try {
+    const res  = await fetch('/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: currentSession, files: selected, event_name: eventName })
+    });
+    const data = await res.json();
+
+    if (data.error) { showToast('❌', data.error); btn.disabled = false; btn.textContent = '💾 حفظ المحددة'; return; }
+
+    const msg = `✅ تم حفظ ${data.saved} صورة في أيفنت "${eventName}"`;
+    document.getElementById('approveSuccess').textContent = msg;
+    document.getElementById('approveSuccess').classList.add('visible');
+    showToast('✅', msg);
+
+    // Now show full results (rejected/dups)
+    showFinalResults();
+
+  } catch(e) {
+    showToast('❌', 'خطأ في الاتصال');
+    btn.disabled = false;
+    btn.textContent = '💾 حفظ المحددة';
+  }
+}
+
+function showFinalResults() {
+  if (!reviewJobStats || !reviewJobResults) return;
+  const s = reviewJobStats;
+  const r = reviewJobResults;
+
+  document.getElementById('statFinal').textContent    = reviewFiles.filter(f=>f.selected).length;
+  document.getElementById('statRejected').textContent = s.rejected;
+  document.getElementById('statDups').textContent     = s.duplicates;
   document.getElementById('statsGrid').style.display  = 'grid';
 
-  document.getElementById('tc-final').textContent      = job.results.final.length;
-  document.getElementById('tc-rejected').textContent   = job.results.rejected.length;
-  document.getElementById('tc-duplicates').textContent = job.results.duplicates.length;
+  document.getElementById('tc-final').textContent      = r.final.length;
+  document.getElementById('tc-rejected').textContent   = r.rejected.length;
+  document.getElementById('tc-duplicates').textContent = r.duplicates.length;
 
-  buildGrid('grid-final',      job.results.final,      'FINAL',      true);
-  buildGrid('grid-rejected',   job.results.rejected,   'REJECTED',   false);
-  buildGrid('grid-duplicates', job.results.duplicates, 'DUPLICATES', false);
+  buildGrid('grid-final',      r.final,      'FINAL',      true);
+  buildGrid('grid-rejected',   r.rejected,   'REJECTED',   false);
+  buildGrid('grid-duplicates', r.duplicates, 'DUPLICATES', false);
 
   document.getElementById('resultsSection').classList.add('visible');
 }
@@ -602,5 +837,6 @@ function showToast(icon, msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
+
 </body>
 </html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تك عربي | Style Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00; --orange-light: #FF8C33;
+    --orange-glow: rgba(255,107,0,0.18);
+    --black: #0A0A0A; --card: #181818; --card2: #1e1e1e;
+    --border: #2a2a2a; --text: #F0F0F0;
+    --muted: #888; --green: #22c55e; --red: #ef4444;
+    --purple: #a855f7; --blue: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--black); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+
+  main { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* HERO */
+  .hero { margin-bottom: 36px; }
+  .brain-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(168,85,247,0.12); border: 1px solid var(--purple); color: var(--purple); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(24px,3.5vw,38px); font-weight: 900; margin-bottom: 8px; }
+  .hero h1 span { color: var(--purple); }
+  .hero p { color: var(--muted); font-size: 14px; max-width: 600px; line-height: 1.7; }
+
+  /* STATS BAR */
+  .stats-bar { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+  .stat-pill { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; gap: 10px; }
+  .stat-pill .num { font-size: 22px; font-weight: 900; color: var(--orange); }
+  .stat-pill .lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .tab-btn { padding: 12px 20px; border: none; background: transparent; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ═══════════════════════════
+     TAB 1 — القواعد
+  ═══════════════════════════ */
+  .rules-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .rules-header h2 { font-size: 16px; font-weight: 900; }
+  .btn-add { background: var(--orange); color: white; border: none; padding: 10px 22px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .btn-add:hover { background: var(--orange-light); }
+
+  .add-rule-form { background: var(--card); border: 1px solid var(--orange); border-radius: 16px; padding: 24px; margin-bottom: 20px; display: none; animation: fadeUp 0.25s ease; }
+  .add-rule-form.visible { display: block; }
+  .add-rule-form h3 { font-size: 15px; font-weight: 900; margin-bottom: 16px; color: var(--orange); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 13px; font-weight: 700; }
+  input, textarea, select { background: #111; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; font-family: 'Cairo', sans-serif; font-size: 13px; color: var(--text); outline: none; transition: all 0.2s; resize: none; }
+  input:focus, textarea:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-glow); }
+  select option { background: #111; }
+  .form-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .btn-save { background: var(--green); color: white; border: none; padding: 10px 24px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-save:hover { opacity: 0.85; }
+  .btn-cancel { background: transparent; border: 1.5px solid var(--border); color: var(--muted); padding: 10px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+
+  .rules-list { display: flex; flex-direction: column; gap: 10px; }
+  .rule-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px; transition: border-color 0.2s; }
+  .rule-card:hover { border-color: #3a3a3a; }
+  .rule-card.pinned { border-color: rgba(255,107,0,0.4); background: rgba(255,107,0,0.04); }
+  .rule-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .rule-body { flex: 1; min-width: 0; }
+  .rule-category { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .rule-category.style { color: var(--orange); }
+  .rule-category.hook { color: var(--purple); }
+  .rule-category.avoid { color: var(--red); }
+  .rule-category.structure { color: var(--blue); }
+  .rule-category.language { color: var(--green); }
+  .rule-text { font-size: 14px; font-weight: 700; line-height: 1.5; margin-bottom: 4px; }
+  .rule-example { font-size: 12px; color: var(--muted); font-style: italic; line-height: 1.5; }
+  .rule-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-pin, .btn-del { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+  .btn-pin:hover { border-color: var(--orange); background: var(--orange-glow); }
+  .btn-del:hover { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .pin-badge { font-size: 10px; color: var(--orange); font-weight: 700; margin-top: 3px; }
+
+  .empty-state { text-align: center; padding: 48px; color: var(--muted); }
+  .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ═══════════════════════════
+     TAB 2 — السكريبتات
+  ═══════════════════════════ */
+  .scripts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .scripts-header h2 { font-size: 16px; font-weight: 900; }
+  .search-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; font-family: 'Cairo', sans-serif; font-size: 13px; color: var(--text); outline: none; width: 220px; transition: all 0.2s; }
+  .search-box:focus { border-color: var(--orange); }
+
+  .add-script-form { background: var(--card); border: 1px solid var(--orange); border-radius: 16px; padding: 24px; margin-bottom: 20px; display: none; animation: fadeUp 0.25s ease; }
+  .add-script-form.visible { display: block; }
+  .add-script-form h3 { font-size: 15px; font-weight: 900; margin-bottom: 16px; color: var(--orange); }
+
+  .script-cards { display: flex; flex-direction: column; gap: 12px; }
+  .script-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.2s; }
+  .script-card:hover { border-color: #3a3a3a; }
+  .script-card.starred { border-color: rgba(255,107,0,0.4); }
+  .script-card-header { padding: 16px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .script-card-title { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+  .script-card-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta-tag { background: #222; border-radius: 6px; padding: 2px 8px; }
+  .script-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-star, .btn-del-s { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+  .btn-star:hover { border-color: var(--orange); }
+  .btn-del-s:hover { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .script-card-body { display: none; border-top: 1px solid var(--border); padding: 20px; background: #111; }
+  .script-card-body.open { display: block; }
+  .script-preview { font-size: 13px; line-height: 1.8; color: #ccc; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+  .script-hook-display { background: rgba(255,107,0,0.08); border: 1px solid rgba(255,107,0,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; }
+  .script-hook-display span { color: var(--orange); font-weight: 700; font-size: 11px; display: block; margin-bottom: 3px; }
+
+  /* notes area */
+  .script-notes-area { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .script-notes-label { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  .script-notes-input { width: 100%; background: #1a1a1a; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'Cairo', sans-serif; font-size: 13px; color: var(--text); resize: none; outline: none; transition: all 0.2s; }
+  .script-notes-input:focus { border-color: var(--orange); }
+  .btn-save-notes { margin-top: 8px; background: var(--orange-glow); border: 1.5px solid var(--orange); color: var(--orange); padding: 8px 18px; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-save-notes:hover { background: var(--orange); color: white; }
+
+  /* ═══════════════════════════
+     TAB 3 — إضافة سكريبت يدوي
+  ═══════════════════════════ */
+
+  /* ═══════════════════════════
+     TAB 4 — الإحصائيات
+  ═══════════════════════════ */
+  .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .insight-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .insight-card h3 { font-size: 14px; font-weight: 900; margin-bottom: 16px; color: var(--muted); }
+  .insight-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-bar { height: 4px; background: var(--orange); border-radius: 2px; margin-top: 4px; }
+
+  /* EXPORT / IMPORT */
+  .data-actions { display: flex; gap: 10px; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .btn-export { background: transparent; border: 1.5px solid var(--green); color: var(--green); padding: 10px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-export:hover { background: rgba(34,197,94,0.1); }
+  .btn-import { background: transparent; border: 1.5px solid var(--blue); color: var(--blue); padding: 10px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-import:hover { background: rgba(59,130,246,0.1); }
+  .btn-clear-all { background: transparent; border: 1.5px solid var(--red); color: var(--red); padding: 10px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-clear-all:hover { background: rgba(239,68,68,0.1); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    main { padding: 24px 16px 60px; }
+    .form-row, .insights-grid { grid-template-columns: 1fr; }
+    .search-box { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main>
+  <div class="hero">
+    <div class="brain-badge">🧠 Style Brain — ذاكرة القناة</div>
+    <h1>قاعدة بيانات <span>أسلوب تك عربي</span></h1>
+    <p>احفظ القواعد، السكريبتات الناجحة، والملاحظات — النظام يتعلم منها تلقائياً ويطبقها على كل سكريبت جديد.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill"><div class="num" id="statRules">0</div><div class="lbl">قاعدة محفوظة</div></div>
+    <div class="stat-pill"><div class="num" id="statScripts">0</div><div class="lbl">سكريبت مرجعي</div></div>
+    <div class="stat-pill"><div class="num" id="statPinned">0</div><div class="lbl">قاعدة مثبتة</div></div>
+    <div class="stat-pill"><div class="num" id="statStarred">0</div><div class="lbl">سكريبت نجمة</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('rules', this)">📌 القواعد والأسلوب</button>
+    <button class="tab-btn" onclick="switchTab('scripts', this)">🎬 السكريبتات المرجعية</button>
+    <button class="tab-btn" onclick="switchTab('add', this)">➕ أضف سكريبت يدوي</button>
+    <button class="tab-btn" onclick="switchTab('insights', this)">📊 إحصائيات</button>
+  </div>
+
+  <!-- TAB: RULES -->
+  <div class="tab-panel active" id="panel-rules">
+    <div class="rules-header">
+      <h2>القواعد والأسلوب — بتطبق على كل سكريبت جديد</h2>
+      <button class="btn-add" onclick="toggleAddRule()">+ أضف قاعدة</button>
+    </div>
+
+    <div class="add-rule-form" id="addRuleForm">
+      <h3>➕ قاعدة جديدة</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>التصنيف</label>
+          <select id="ruleCategory">
+            <option value="style">🎨 أسلوب عام</option>
+            <option value="hook">⚡ Hook</option>
+            <option value="structure">📐 هيكل السكريبت</option>
+            <option value="language">💬 اللغة والحوار</option>
+            <option value="avoid">🚫 تجنب دايماً</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الأيقونة</label>
+          <input type="text" id="ruleIcon" placeholder="مثال: 🔥" maxlength="4" value="📌">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>القاعدة <span style="color:var(--orange)">*</span></label>
+          <input type="text" id="ruleText" placeholder="مثال: ممنوع تبدأ الحوار بـ 'هل تعلم'">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>مثال توضيحي <span style="color:var(--muted);font-size:11px">(اختياري)</span></label>
+          <textarea id="ruleExample" rows="2" placeholder="مثال: بدل 'هل تعلم إن الـ AI...' → 'موبايلك بعرف وين أنت قبل ما تحركه'"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveRule()">💾 حفظ القاعدة</button>
+        <button class="btn-cancel" onclick="toggleAddRule()">إلغاء</button>
+      </div>
+    </div>
+
+    <div class="rules-list" id="rulesList">
+      <div class="empty-state">
+        <div class="big">📌</div>
+        <p>ما في قواعد بعد — أضف أول قاعدة أسلوب للقناة</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SCRIPTS -->
+  <div class="tab-panel" id="panel-scripts">
+    <div class="scripts-header">
+      <h2>السكريبتات المرجعية — النموذج يتعلم منها</h2>
+      <input type="text" class="search-box" id="scriptSearch" placeholder="🔍 ابحث..." oninput="renderScripts()">
+    </div>
+
+    <div class="script-cards" id="scriptCards">
+      <div class="empty-state">
+        <div class="big">🎬</div>
+        <p>ما في سكريبتات بعد — أضف سكريبتاتك الناجحة أو استخدم مولّد السكريبت وبيتحفظوا تلقائياً</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ADD MANUAL -->
+  <div class="tab-panel" id="panel-add">
+    <div class="add-script-form visible" style="border-color:var(--border)">
+      <h3 style="color:var(--text)">➕ أضف سكريبت يدوي</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>عنوان / فكرة الفيديو <span style="color:var(--orange)">*</span></label>
+          <input type="text" id="manIdea" placeholder="مثال: كيف الـ AI بيفهم كلامنا">
+        </div>
+        <div class="form-group">
+          <label>نوع الفيديو</label>
+          <select id="manType">
+            <option value="ريلز انستغرام">ريلز انستغرام</option>
+            <option value="يوتيوب شورتس">يوتيوب شورتس</option>
+            <option value="تيك توك">تيك توك</option>
+            <option value="فيديو يوتيوب طويل">يوتيوب طويل</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>المدة</label>
+          <select id="manDuration">
+            <option value="30-60 ثانية">30-60 ثانية</option>
+            <option value="1-3 دقائق">1-3 دقائق</option>
+            <option value="5-10 دقائق">5-10 دقائق</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الـ Hook المستخدم <span style="color:var(--muted);font-size:11px">(اختياري)</span></label>
+          <input type="text" id="manHook" placeholder="مثال: موبايلك بعرف وين أنت...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>نص السكريبت <span style="color:var(--orange)">*</span></label>
+          <textarea id="manScript" rows="8" placeholder="الصق سكريبت ناجح هون — النظام رح يتعلم منه أسلوبك وإيقاعك"></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>ليش نجح هاد السكريبت؟ <span style="color:var(--muted);font-size:11px">(اختياري — مهم للتعلم)</span></label>
+          <textarea id="manNotes" rows="2" placeholder="مثال: الهوك كان صادم، الإيقاع سريع، النهاية خلّت الناس يعيدوا الفيديو"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveManualScript()">💾 حفظ السكريبت</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: INSIGHTS -->
+  <div class="tab-panel" id="panel-insights">
+    <div class="insights-grid" id="insightsGrid">
+      <div class="insight-card">
+        <h3>⚡ أكثر أنواع Hook استخداماً</h3>
+        <div id="hookStats"><div class="empty-state" style="padding:20px"><p>ما في بيانات بعد</p></div></div>
+      </div>
+      <div class="insight-card">
+        <h3>🎬 أكثر أنواع الفيديو</h3>
+        <div id="typeStats"><div class="empty-state" style="padding:20px"><p>ما في بيانات بعد</p></div></div>
+      </div>
+      <div class="insight-card">
+        <h3>📌 القواعد الأكثر تثبيتاً</h3>
+        <div id="pinnedRules"><div class="empty-state" style="padding:20px"><p>ما في قواعد مثبتة</p></div></div>
+      </div>
+      <div class="insight-card">
+        <h3>🌟 السكريبتات النجوم</h3>
+        <div id="starredList"><div class="empty-state" style="padding:20px"><p>ما في نجوم بعد</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA ACTIONS -->
+  <div class="data-actions">
+    <button class="btn-export" onclick="exportData()">⬇️ تصدير كل البيانات (JSON)</button>
+    <button class="btn-import" onclick="document.getElementById('importFile').click()">⬆️ استيراد بيانات</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn-clear-all" onclick="clearAll()">🗑️ مسح كل شي</button>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  STORAGE KEYS
+// ══════════════════════════════════════════════
+const RULES_KEY   = 'ta_brain_rules';
+const SCRIPTS_KEY = 'ta_brain_scripts';  // يشمل history + manual
+
+// ══════════════════════════════════════════════
+//  DATA HELPERS
+// ══════════════════════════════════════════════
+function getRules()   { return JSON.parse(localStorage.getItem(RULES_KEY)   || '[]'); }
+function getScripts() { return JSON.parse(localStorage.getItem(SCRIPTS_KEY) || '[]'); }
+function saveRules(d)   { localStorage.setItem(RULES_KEY,   JSON.stringify(d)); }
+function saveScripts(d) { localStorage.setItem(SCRIPTS_KEY, JSON.stringify(d)); }
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'scripts')  renderScripts();
+  if (name === 'insights') renderInsights();
+}
+
+// ══════════════════════════════════════════════
+//  STATS BAR
+// ══════════════════════════════════════════════
+function updateStats() {
+  const rules   = getRules();
+  const scripts = getScripts();
+  document.getElementById('statRules').textContent   = rules.length;
+  document.getElementById('statScripts').textContent = scripts.length;
+  document.getElementById('statPinned').textContent  = rules.filter(r => r.pinned).length;
+  document.getElementById('statStarred').textContent = scripts.filter(s => s.starred).length;
+}
+
+// ══════════════════════════════════════════════
+//  RULES TAB
+// ══════════════════════════════════════════════
+let addRuleOpen = false;
+function toggleAddRule() {
+  addRuleOpen = !addRuleOpen;
+  document.getElementById('addRuleForm').classList.toggle('visible', addRuleOpen);
+  if (addRuleOpen) document.getElementById('ruleText').focus();
+}
+
+function saveRule() {
+  const text = document.getElementById('ruleText').value.trim();
+  if (!text) { showToast('⚠️','اكتب القاعدة أول!'); return; }
+
+  const rule = {
+    id: Date.now(),
+    category: document.getElementById('ruleCategory').value,
+    icon: document.getElementById('ruleIcon').value.trim() || '📌',
+    text,
+    example: document.getElementById('ruleExample').value.trim(),
+    pinned: false,
+    date: new Date().toLocaleDateString('ar')
+  };
+
+  const rules = getRules();
+  rules.unshift(rule);
+  saveRules(rules);
+
+  // reset form
+  document.getElementById('ruleText').value = '';
+  document.getElementById('ruleExample').value = '';
+  document.getElementById('ruleIcon').value = '📌';
+  toggleAddRule();
+  renderRules();
+  updateStats();
+  showToast('✅', 'تم حفظ القاعدة!');
+}
+
+function togglePin(id) {
+  const rules = getRules();
+  const idx = rules.findIndex(r => r.id === id);
+  if (idx !== -1) { rules[idx].pinned = !rules[idx].pinned; saveRules(rules); }
+  renderRules(); updateStats();
+}
+
+function deleteRule(id) {
+  if (!confirm('تحذف هاي القاعدة؟')) return;
+  const rules = getRules().filter(r => r.id !== id);
+  saveRules(rules);
+  renderRules(); updateStats();
+}
+
+function renderRules() {
+  const rules = getRules();
+  const el = document.getElementById('rulesList');
+  if (!rules.length) {
+    el.innerHTML = `<div class="empty-state"><div class="big">📌</div><p>ما في قواعد بعد — أضف أول قاعدة أسلوب للقناة</p></div>`;
+    return;
+  }
+  // pinned first
+  const sorted = [...rules].sort((a,b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  el.innerHTML = sorted.map(r => `
+    <div class="rule-card ${r.pinned ? 'pinned' : ''}">
+      <div class="rule-icon">${r.icon}</div>
+      <div class="rule-body">
+        <div class="rule-category ${r.category}">${catLabel(r.category)}</div>
+        <div class="rule-text">${r.text}</div>
+        ${r.example ? `<div class="rule-example">مثال: ${r.example}</div>` : ''}
+        ${r.pinned ? '<div class="pin-badge">📌 مثبتة — بتظهر في كل prompt</div>' : ''}
+      </div>
+      <div class="rule-actions">
+        <button class="btn-pin" onclick="togglePin(${r.id})" title="${r.pinned ? 'فك التثبيت' : 'ثبّت'}">${r.pinned ? '📌' : '📍'}</button>
+        <button class="btn-del" onclick="deleteRule(${r.id})" title="حذف">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function catLabel(c) {
+  return { style:'🎨 أسلوب عام', hook:'⚡ Hook', structure:'📐 هيكل', language:'💬 لغة وحوار', avoid:'🚫 تجنب' }[c] || c;
+}
+
+// ══════════════════════════════════════════════
+//  SCRIPTS TAB
+// ══════════════════════════════════════════════
+function renderScripts() {
+  const q = (document.getElementById('scriptSearch')?.value || '').toLowerCase();
+  let scripts = getScripts();
+  if (q) scripts = scripts.filter(s => s.idea?.toLowerCase().includes(q) || s.script?.toLowerCase().includes(q));
+  scripts = [...scripts].sort((a,b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
+
+  const el = document.getElementById('scriptCards');
+  if (!scripts.length) {
+    el.innerHTML = `<div class="empty-state"><div class="big">🎬</div><p>ما في سكريبتات تطابق البحث</p></div>`;
+    return;
+  }
+  el.innerHTML = scripts.map(s => `
+    <div class="script-card ${s.starred ? 'starred' : ''}">
+      <div class="script-card-header" onclick="toggleScriptBody(${s.id})">
+        <div>
+          <div class="script-card-title">${s.starred ? '⭐ ' : ''}${s.idea || 'سكريبت بدون عنوان'}</div>
+          <div class="script-card-meta">
+            <span class="meta-tag">${s.videoType || '—'}</span>
+            <span class="meta-tag">${s.duration || '—'}</span>
+            <span class="meta-tag">${s.date || ''}</span>
+            ${s.manual ? '<span class="meta-tag" style="color:var(--purple)">يدوي</span>' : ''}
+          </div>
+        </div>
+        <div class="script-card-actions">
+          <button class="btn-star" onclick="event.stopPropagation(); toggleStar(${s.id})" title="نجمة">${s.starred ? '⭐' : '☆'}</button>
+          <button class="btn-del-s" onclick="event.stopPropagation(); deleteScript(${s.id})" title="حذف">🗑️</button>
+        </div>
+      </div>
+      <div class="script-card-body" id="sbody-${s.id}">
+        ${s.hook ? `<div class="script-hook-display"><span>⚡ الـ Hook</span>${s.hook}</div>` : ''}
+        <div class="script-preview">${escapeHTML(s.script || '')}</div>
+        <div class="script-notes-area">
+          <div class="script-notes-label">📝 ملاحظاتك على هاد السكريبت (بتأثر على التعلم):</div>
+          <textarea class="script-notes-input" id="snotes-${s.id}" rows="2" placeholder="مثال: الهوك كان قوي، بس الشوت الثالث طويل — خليه أقصر">${s.notes || ''}</textarea>
+          <button class="btn-save-notes" onclick="saveScriptNotes(${s.id})">💾 حفظ الملاحظات</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleScriptBody(id) {
+  const el = document.getElementById('sbody-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleStar(id) {
+  const scripts = getScripts();
+  const idx = scripts.findIndex(s => s.id === id);
+  if (idx !== -1) { scripts[idx].starred = !scripts[idx].starred; saveScripts(scripts); }
+  renderScripts(); updateStats();
+}
+
+function deleteScript(id) {
+  if (!confirm('تحذف هاد السكريبت؟')) return;
+  saveScripts(getScripts().filter(s => s.id !== id));
+  renderScripts(); updateStats();
+}
+
+function saveScriptNotes(id) {
+  const scripts = getScripts();
+  const idx = scripts.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    scripts[idx].notes = document.getElementById('snotes-' + id)?.value || '';
+    saveScripts(scripts);
+  }
+  showToast('✅', 'تم حفظ الملاحظات!');
+}
+
+// ══════════════════════════════════════════════
+//  ADD MANUAL SCRIPT
+// ══════════════════════════════════════════════
+function saveManualScript() {
+  const idea   = document.getElementById('manIdea').value.trim();
+  const script = document.getElementById('manScript').value.trim();
+  if (!idea || !script) { showToast('⚠️','اكتب الفكرة والسكريبت على الأقل!'); return; }
+
+  const scripts = getScripts();
+  scripts.unshift({
+    id: Date.now(),
+    idea,
+    videoType: document.getElementById('manType').value,
+    duration:  document.getElementById('manDuration').value,
+    hook:      document.getElementById('manHook').value.trim(),
+    script,
+    notes:     document.getElementById('manNotes').value.trim(),
+    starred: false,
+    manual: true,
+    date: new Date().toLocaleDateString('ar')
+  });
+  saveScripts(scripts);
+
+  document.getElementById('manIdea').value = '';
+  document.getElementById('manScript').value = '';
+  document.getElementById('manHook').value = '';
+  document.getElementById('manNotes').value = '';
+  updateStats();
+  showToast('✅', 'تم حفظ السكريبت!');
+}
+
+// ══════════════════════════════════════════════
+//  INSIGHTS
+// ══════════════════════════════════════════════
+function renderInsights() {
+  const scripts = getScripts();
+  const rules   = getRules();
+
+  // hook types
+  const hookCount = {};
+  scripts.forEach(s => {
+    const t = s.videoType || 'غير محدد';
+    hookCount[t] = (hookCount[t] || 0) + 1;
+  });
+  const typeEl = document.getElementById('typeStats');
+  const typeEntries = Object.entries(hookCount).sort((a,b) => b[1]-a[1]);
+  const max = typeEntries[0]?.[1] || 1;
+  typeEl.innerHTML = typeEntries.length ? typeEntries.map(([k,v]) => `
+    <div class="insight-item">
+      <div>
+        <div>${k}</div>
+        <div class="insight-bar" style="width:${(v/max)*100}%"></div>
+      </div>
+      <strong>${v}</strong>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:20px"><p>ما في بيانات</p></div>';
+
+  // hook text frequency
+  const hookFreq = {};
+  scripts.forEach(s => { if(s.hook) { const k=s.hook.substring(0,30); hookFreq[k]=(hookFreq[k]||0)+1; } });
+  const hookEl = document.getElementById('hookStats');
+  const hookEntries = Object.entries(hookFreq).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  hookEl.innerHTML = hookEntries.length ? hookEntries.map(([k,v])=>`
+    <div class="insight-item"><div style="font-size:12px">${k}...</div><strong>${v}</strong></div>
+  `).join('') : '<div class="empty-state" style="padding:20px"><p>ما في بيانات</p></div>';
+
+  // pinned rules
+  const pinnedEl = document.getElementById('pinnedRules');
+  const pinned = rules.filter(r=>r.pinned).slice(0,5);
+  pinnedEl.innerHTML = pinned.length ? pinned.map(r=>`
+    <div class="insight-item"><div style="font-size:13px">${r.icon} ${r.text}</div></div>
+  `).join('') : '<div class="empty-state" style="padding:20px"><p>ما في مثبتات</p></div>';
+
+  // starred
+  const starredEl = document.getElementById('starredList');
+  const starred = scripts.filter(s=>s.starred).slice(0,5);
+  starredEl.innerHTML = starred.length ? starred.map(s=>`
+    <div class="insight-item"><div style="font-size:13px">⭐ ${s.idea}</div><span style="font-size:11px;color:var(--muted)">${s.videoType||''}</span></div>
+  `).join('') : '<div class="empty-state" style="padding:20px"><p>ما في نجوم</p></div>';
+}
+
+// ══════════════════════════════════════════════
+//  EXPORT / IMPORT / CLEAR
+// ══════════════════════════════════════════════
+function exportData() {
+  const data = { rules: getRules(), scripts: getScripts(), exportDate: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ta_brain_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast('✅', 'تم التصدير!');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.rules)   saveRules([...getRules(), ...data.rules]);
+      if (data.scripts) saveScripts([...getScripts(), ...data.scripts]);
+      renderRules(); renderScripts(); updateStats();
+      showToast('✅', `تم الاستيراد: ${data.rules?.length||0} قاعدة، ${data.scripts?.length||0} سكريبت`);
+    } catch { showToast('❌', 'ملف JSON خاطئ'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('حذف كل البيانات؟ هاد ما ينعكس!')) return;
+  localStorage.removeItem(RULES_KEY);
+  localStorage.removeItem(SCRIPTS_KEY);
+  renderRules(); renderScripts(); updateStats();
+  showToast('🗑️', 'تم مسح كل البيانات');
+}
+
+// ══════════════════════════════════════════════
+//  SYNC FROM SCRIPT GENERATOR HISTORY
+// ══════════════════════════════════════════════
+function syncFromHistory() {
+  const history = JSON.parse(localStorage.getItem('scriptHistory') || '[]');
+  if (!history.length) return;
+  const existing = getScripts();
+  const existingIds = new Set(existing.map(s => s.sourceId));
+  const newOnes = history
+    .filter(h => !existingIds.has('hist_' + h.date + '_' + (h.idea||'').slice(0,10)))
+    .map(h => ({
+      id: Date.now() + Math.random(),
+      sourceId: 'hist_' + h.date + '_' + (h.idea||'').slice(0,10),
+      idea: h.idea,
+      videoType: h.videoType,
+      duration: h.duration,
+      hook: h.hook,
+      script: h.script,
+      notes: '',
+      starred: false,
+      manual: false,
+      date: h.date
+    }));
+  if (newOnes.length) {
+    saveScripts([...newOnes, ...existing]);
+    updateStats();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function escapeHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function showToast(icon, msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 3500);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+// Add default rules if first time
+function initDefaultRules() {
+  if (getRules().length > 0) return;
+  const defaults = [
+    { id: 1, category: 'avoid', icon: '🚫', text: "ممنوع تبدأ الحوار بـ 'هل تعلم'", example: "بدل 'هل تعلم إن الـ AI...' → 'موبايلك شايفك حتى لما الشاشة مطفية'", pinned: true, date: 'افتراضي' },
+    { id: 2, category: 'avoid', icon: '🚫', text: "ممنوع 'في هذا الفيديو سنتعلم'", example: "ابدأ بالمشهد مباشرة — بدون مقدمة رسمية", pinned: true, date: 'افتراضي' },
+    { id: 3, category: 'language', icon: '💬', text: "اللهجة شامية طبيعية 100% — مش مزيج فصحى وعامية", example: "بيمشي وبيحكي — مش 'يسير ويتكلم'", pinned: true, date: 'افتراضي' },
+    { id: 4, category: 'structure', icon: '📐', text: "كل شوت 1-3 ثواني — ما في تمطيط", example: "إذا الشوت أكثر من 4 ثواني بدون حركة، اقطعه لشوتين", pinned: false, date: 'افتراضي' },
+    { id: 5, category: 'hook', icon: '⚡', text: "الـ Hook لازم يخلق فجوة معلومات — المشاهد يكمل عشان يعرف", example: "بدل 'رح نحكي عن الـ AI' → 'موبايلك بعرف وين أنت قبل ما تحركه — وهاد مو bug'", pinned: true, date: 'افتراضي' },
+    { id: 6, category: 'avoid', icon: '🚫', text: "ممنوع مشاهد 'مصطنعة' مثل الكتابة على لوح أبيض أو التفسير بالإيماءات المبالغ فيها", example: "", pinned: false, date: 'افتراضي' },
+    { id: 7, category: 'structure', icon: '📐', text: "النهاية لازم تكون Loop أو سؤال يخلي الواحد يعيد أو يعلق", example: "نهاية: 'إذا بدك تفهم — ارجع للبداية' مع نفس المشهد الأول", pinned: false, date: 'افتراضي' },
+  ];
+  saveRules(defaults);
+}
+
+initDefaultRules();
+syncFromHistory();
+renderRules();
+updateStats();
+</script>
+</body>
+</html>
